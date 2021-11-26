@@ -10,7 +10,6 @@ using MimeKit;
 using MimeKit.Text;
 using Vetrina.Server.Abstractions;
 using Vetrina.Server.Options;
-using Vetrina.Shared;
 using Vetrina.Shared.Models;
 
 namespace Vetrina.Server.Services

@@ -8,7 +8,6 @@ using Vetrina.Server.Abstractions;
 using Vetrina.Server.Attributes;
 using Vetrina.Server.Constants;
 using Vetrina.Server.Controllers.Abstract;
-using Vetrina.Shared;
 using Vetrina.Shared.Constants;
 using Vetrina.Shared.Models;
 
