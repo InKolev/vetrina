@@ -1,6 +1,6 @@
-namespace Vetrina.Shared.Models
+﻿namespace Vetrina.Shared.Models
 {
-    public enum UpdateUserResponseType
+    public enum GetUserByIdResponseType
     {
         Successful = 1,
         UnexpectedFailure = 2,
