@@ -1,0 +1,30 @@
+﻿@page "/LogoutUser"
+@using Microsoft.AspNetCore.Components.Authorization
+@using Blazored.LocalStorage
+@using Vetrina.Client.Constants
+@using Vetrina.Client.Services
+
+@inject ISnackbar snackbarService;
+@inject ILocalStorageService localStorage;
+@inject AuthenticationStateProvider authenticationStateProvider;
+@inject HttpClient httpClient;
+@inject NavigationManager navigationManager;
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        await this.localStorage.RemoveItemAsync(
+            AuthenticationConstants.LocalStorageAuthTokenKey);
+
+        ((CustomAuthenticationStateProvider)this.authenticationStateProvider).NotifyUserLogout();
+
+        this.httpClient.DefaultRequestHeaders.Authorization = null;
+
+        this.snackbarService.Add(
+            "User successfully logged out.",
+            Severity.Success);
+
+        this.navigationManager.NavigateTo(
+            NavigationConstants.Home);
+    }
+}

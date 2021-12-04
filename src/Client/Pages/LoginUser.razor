@@ -1,0 +1,114 @@
+﻿@*@page "/LoginUser"
+@using global::Client.CSharp.Contracts
+@using Microsoft.AspNetCore.Components.Authorization
+@using InputType = MudBlazor.InputType
+@using Blazored.LocalStorage
+@using System.Net.Http.Headers
+@using Vetrina.Client.Constants
+@using Vetrina.Client.Services
+@using Vetrina.Shared.Models
+
+@inject ISnackbar snackbarService;
+@inject IAccountClient accountClient;
+@inject ILocalStorageService localStorage;
+@inject AuthenticationStateProvider authenticationStateProvider;
+@inject HttpClient httpClient;
+@inject NavigationManager navigationManager;
+
+<MudText GutterBottom="true"></MudText>
+
+<MudContainer Class="d-flex justify-center align-center">
+    <MudCard Style="min-width: 300px;">
+        <EditForm Model="@loginUserRequest" OnValidSubmit="@OnValidSubmitHandler">
+            <DataAnnotationsValidator />
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h5">Login user</MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+
+            <MudCardContent>
+                <MudTextField @bind-Value="loginUserRequest.Email"
+                              For="@(() => loginUserRequest.Email)"
+                              Label="Email" 
+                              FullWidth="true"/>
+
+                <MudTextField @bind-Value="loginUserRequest.Password"
+                              For="@(() => loginUserRequest.Password)"
+                              Label="Password"
+                              InputType="InputType.Password"
+                              FullWidth="true"/>
+            </MudCardContent>
+
+            <MudCardActions>
+                <MudButton ButtonType="ButtonType.Submit"
+                           Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           Class="ml-auto"
+                           FullWidth="true">Login</MudButton>
+            </MudCardActions>
+
+        </EditForm>
+    </MudCard>
+</MudContainer>
+
+@code {
+    readonly LoginRequest loginUserRequest = new LoginRequest();
+
+    private async Task OnValidSubmitHandler()
+    {
+        this.snackbarService.Add(
+            "Login form valid. Attempting to login...",
+            Severity.Info);
+
+        LoginResponse loginUserResponse = null;
+        try
+        {
+            loginUserResponse = await accountClient.LoginUserAsync(this.loginUserRequest);
+        }
+        catch (SwaggerException<LoginResponse> e)
+        {
+            this.snackbarService.Add(
+                $"Login attempt failed. Reason: {e.Result.ErrorMessage}.",
+                Severity.Error);
+
+            return;
+        }
+        catch (Exception e)
+        {
+            this.snackbarService.Add(
+                $"Login attempt failed. Reason: {e.Message}.",
+                Severity.Error);
+
+            return;
+        }
+
+        if (loginUserResponse.IsSuccessful)
+        {
+            await localStorage.SetItemAsync(
+                AuthenticationConstants.LocalStorageAuthTokenKey,
+                loginUserResponse.Token);
+
+            ((CustomAuthenticationStateProvider)authenticationStateProvider).NotifyUserAuthentication(
+                this.loginUserRequest.Email);
+
+            httpClient.DefaultRequestHeaders.Authorization =
+                new AuthenticationHeaderValue(
+                    AuthenticationConstants.AuthorizationHeaderScheme,
+                    loginUserResponse.Token);
+
+            this.snackbarService.Add(
+                "Successfully logged in user.",
+                Severity.Success);
+
+            this.navigationManager.NavigateTo(
+                NavigationConstants.Home);
+        }
+        else
+        {
+            this.snackbarService.Add(
+                $"Failed to login user. Reason: {loginUserResponse.ErrorMessage}.",
+                Severity.Warning);
+        }
+    }
+}*@

@@ -1,7 +1,179 @@
 ﻿@page "/"
+@using Blazored.LocalStorage
+@using System.Diagnostics
+@using Vetrina.Client.Services
+@using Vetrina.Shared
+@using Vetrina.Shared.Request
+@using Vetrina.Shared.SearchModels
 
-<h1>Hello, world!</h1>
+@inject HttpClient HttpClient;
+@inject ISnackbar SnackbarService;
+@inject ILocalStorageService LocalStorageService;
+@inject ApplicationState ApplicationState;
 
-Welcome to your new app.
+<MudContainer Class="mt-16">
+    <MudText Typo="Typo.h4" Align="Align.Center" GutterBottom="true">
+        Промоции
+    </MudText>
+    <MudGrid>
+        <MudItem md="2" lg="2" xl="2"></MudItem>
+        <MudItem xs="12" sm="12" md="8" lg="8" xl="8">
+            <MudGrid>
+                <MudItem sm="1" md="1"></MudItem>
+                <MudItem xs="12" sm="10" md="10">
+                    <MudTextField DebounceInterval="400" 
+                                  OnDebounceIntervalElapsed="Search"
+                                  @bind-Value="SearchPromotionsRequest.SearchTerm" 
+                                  Immediate="true"
+                                  Label="Търси" 
+                                  Margin="Margin.Dense" 
+                                  Variant="Variant.Outlined"
+                                  Adornment="Adornment.End" 
+                                  AdornmentIcon="@Icons.Filled.Search" 
+                                  AdornmentColor="Color.Secondary" />
+                </MudItem>
+                <MudItem sm="1" md="1"></MudItem>
+            </MudGrid>
+            <MudGrid>
+                <MudItem xs="12" sm="12" md="12">
+                    <MudCheckBox @bind-Checked="@SearchPromotionsRequest.IncludeKaufland"
+                                 Label="Търси в Kaufland"
+                                 Color="Color.Primary">
+                    </MudCheckBox>
+                    <MudCheckBox @bind-Checked="@SearchPromotionsRequest.IncludeLidl"
+                                 Label="Търси в Lidl"
+                                 Color="Color.Secondary">
+                    </MudCheckBox>
+                    <MudCheckBox @bind-Checked="@SearchPromotionsRequest.IncludeBilla"
+                                 Label="Търси в Billa"
+                                 Disabled="true"
+                                 Color="Color.Primary">
+                    </MudCheckBox>
+                    <MudCheckBox @bind-Checked="@SearchPromotionsRequest.IncludeFantastiko"
+                                 Label="Търси във Fantastiko"
+                                 Disabled="true"
+                                 Color="Color.Secondary">
+                    </MudCheckBox>
+                </MudItem>
+            </MudGrid>
+            <MudSlider @bind-Value="@SearchPromotionsRequest.MaxNumberOfDocs" Step="2" Max="100" Min="2" Color="Color.Primary"></MudSlider>
 
-<SurveyPrompt Title="How is Blazor working for you?" />
+            @if (this.SearchPromotionsResponse != null)
+            {
+                <MudText Align="Align.Center" Typo="Typo.body2" Color="Color.Default" Style="opacity: 0.8; font-style: oblique;">
+                    Върнати са @this.SearchPromotionsResponse.Documents.Count от общо @this.SearchPromotionsResponse.TotalHits резултати 
+                    за @(this.EndToEndLatencySecs) секунди (@this.NetworkLatencySecs + @this.ServerProcessingTimeSecs)
+                </MudText>
+            }
+        </MudItem>
+        <MudItem md="2" lg="2" xl="2"></MudItem>
+    </MudGrid>
+</MudContainer>
+
+@if (this.SearchPromotionsResponse != null && this.SearchPromotionsResponse.Documents.Any())
+{
+    <MudContainer Class="mt-16">
+        @if (this.LoadingSearchResults)
+        {
+            <MudProgressCircular Color="Color.Primary" Size="Size.Large" Indeterminate="true" />
+        }
+        else
+        {
+            <MudGrid>
+                @foreach (var promotion in this.SearchPromotionsResponse.Documents)
+                {
+                    <MudItem md="4" lg="4" xl="4">
+                        <MudCard>
+                            <MudCardHeader>
+                                <CardHeaderAvatar>
+                                    <MudAvatar Size="Size.Large"
+                                               Square="@(promotion.Document.Store == Store.Kaufland ? true : false)"
+                                               Image="@($"/resources/{promotion.Document.Store}.svg")">
+                                    </MudAvatar>
+                                </CardHeaderAvatar>
+                                <CardHeaderContent>
+                                    <MudText Typo="Typo.body1">@promotion.Document.DescriptionRaw</MudText>
+                                </CardHeaderContent>
+                            </MudCardHeader>
+                            <MudCardMedia Image="@promotion.Document.ImageUrl" Height="200" />
+                            <MudCardContent>
+                                <MudButton OnClick="() => ApplicationState.AddPromotionalItemToShoppingList(promotion.Document)"
+                                           StartIcon="@Icons.Material.Outlined.Add"
+                                           FullWidth="true"
+                                           Color="ApplicationState.MainThemeColor"
+                                           Variant="Variant.Filled">
+                                    @($"{promotion.Document.Price} BGN")
+                                </MudButton>
+                            </MudCardContent>
+                        </MudCard>
+                    </MudItem>
+                }
+            </MudGrid>
+        }
+    </MudContainer>
+}
+
+@code
+{
+    public SearchPromotionsRequest SearchPromotionsRequest { get; set; } = new SearchPromotionsRequest();
+
+    public LuceneSearchResponse<Promotion> SearchPromotionsResponse { get; set; }
+
+    public bool LoadingSearchResults { get; set; } = false;
+
+    public Stopwatch Stopwatch { get; set; } = Stopwatch.StartNew();
+
+    public double EndToEndLatencySecs { get; set; }
+    public double NetworkLatencySecs { get; set; }
+    public double ServerProcessingTimeSecs { get; set; }
+
+    public async Task Search(string searchTerm)
+    {
+        if (string.IsNullOrWhiteSpace(searchTerm))
+        {
+            return;
+        }
+
+        this.LoadingSearchResults = true;
+        this.SearchPromotionsRequest.SearchTerm = searchTerm;
+
+        this.Stopwatch.Restart();
+
+        var httpResponse = await this.HttpClient.PostAsJsonAsync("/api/SearchPromotions", SearchPromotionsRequest);
+
+        this.Stopwatch.Stop();
+
+        if (httpResponse.IsSuccessStatusCode)
+        {
+            this.SnackbarService.Clear();
+            this.SnackbarService.Configuration.PositionClass = Defaults.Classes.Position.BottomCenter;
+            this.SnackbarService.Configuration.SnackbarVariant = Variant.Outlined;
+            this.SnackbarService.Add("Searching for goodies...", Severity.Success);
+            this.SearchPromotionsResponse = await httpResponse.Content.ReadFromJsonAsync<LuceneSearchResponse<Promotion>>();
+
+            this.EndToEndLatencySecs = Math.Round(this.Stopwatch.Elapsed.TotalMilliseconds / 1000, 2, MidpointRounding.AwayFromZero);
+            this.ServerProcessingTimeSecs = Math.Round(this.SearchPromotionsResponse.ProcessingTimeMs / 1000, 2, MidpointRounding.AwayFromZero);
+            this.NetworkLatencySecs = Math.Round(this.EndToEndLatencySecs - this.ServerProcessingTimeSecs, 2, MidpointRounding.AwayFromZero);
+        }
+        else
+        {
+            this.SnackbarService.Clear();
+            this.SnackbarService.Configuration.PositionClass = Defaults.Classes.Position.BottomCenter;
+            this.SnackbarService.Configuration.SnackbarVariant = Variant.Outlined;
+            this.SnackbarService.Add("Failed while searching for promotions...", Severity.Error);
+            this.SnackbarService.Add($"Reason: {httpResponse.ReasonPhrase}", Severity.Error);
+        }
+
+        this.LoadingSearchResults = false;
+    }
+
+    protected override void OnInitialized()
+    {
+        this.ApplicationState.ThemeColorChanged += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        this.ApplicationState.ThemeColorChanged -= StateHasChanged;
+    }
+}

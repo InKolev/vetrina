@@ -1,17 +1,49 @@
-﻿@inherits LayoutComponentBase
+﻿@using Microsoft.AspNetCore.Components.Authorization
+@using Vetrina.Client.Services
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
+@inherits LayoutComponentBase
 
-    <div class="main">
-        <div class="top-row px-4">
-            <a href="http://blazor.net" target="_blank" class="ml-md-auto">About</a>
-        </div>
 
-        <div class="content px-4">
-            @Body
-        </div>
-    </div>
-</div>
+@inject ApplicationState ApplicationState;
+
+<MudThemeProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<MudLayout>
+    <MudAppBar Elevation="1" Color="ApplicationState.MainThemeColor">
+        <MudIconButton Icon="@Icons.Material.Filled.Brightness6" Color="Color.Inherit" Edge="Edge.End" OnClick="ApplicationState.SwitchColor" />
+        <MudSpacer />
+
+        <AuthorizeView>
+            <Authorized>
+                <p>Hi, @context.User.Identity.Name</p>
+                <MudIconButton Link="/LogoutUser" Target="_self" Icon="@Icons.Material.Filled.Logout" Color="Color.Inherit" Edge="Edge.End" />
+            </Authorized>
+            <NotAuthorized>
+                <p>Hi there, anonymous friend</p>
+                <MudIconButton Link="/LoginUser" Target="_self" Icon="@Icons.Material.Filled.Login" Color="Color.Inherit" Edge="Edge.End" />
+                <MudIconButton Link="/RegisterUser" Target="_self" Icon="@Icons.Material.Filled.HowToReg" Color="Color.Inherit" Edge="Edge.End" />
+            </NotAuthorized>
+        </AuthorizeView>
+
+        <MudBadge Content="ApplicationState.ShoppingList.Count()" Color="Color.Tertiary" Overlap="true" Class="mx-6 my-4">
+            <MudIconButton Link="/ShoppingList" Target="_self" Icon="@Icons.Material.Filled.FoodBank" Color="Color.Inherit" Edge="Edge.End" />
+        </MudBadge>
+    </MudAppBar>
+    <MudMainContent>
+        @Body
+    </MudMainContent>
+</MudLayout>
+
+@code {
+    protected override void OnInitialized()
+    {
+        this.ApplicationState.ShoppingListChanged += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        this.ApplicationState.ShoppingListChanged -= StateHasChanged;
+    }
+}

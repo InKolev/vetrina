@@ -1,0 +1,97 @@
+﻿@page "/ShoppingList"
+@using System.Text
+@using Vetrina.Client.Services
+@using Vetrina.Shared
+
+@inject ApplicationState applicationState;
+@inject IClipboardService clipboardService;
+@inject ISnackbar snackbarService;
+
+<MudTable Items="@Elements" MultiSelection="true" @bind-SelectedItems="selectedItems" Hover="true">
+    <HeaderContent>
+        <MudTh>Product</MudTh>
+        <MudTh>Price</MudTh>
+        <MudTh>Quantity</MudTh>
+        <MudTh>TotalPrice</MudTh>
+        <MudTh>Store</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="Product">@context.Promotion.DescriptionRaw</MudTd>
+        <MudTd DataLabel="Price">@context.Promotion.Price</MudTd>
+        <MudTd DataLabel="Quantity">@context.Count</MudTd>
+        <MudTd DataLabel="TotalPrice">@(context.Count * double.Parse(context.Promotion.Price.Trim().Replace(',','.')))</MudTd>
+        <MudTd DataLabel="Store">@context.Promotion.Store.ToString()</MudTd>
+    </RowTemplate>
+    <PagerContent>
+        <MudTablePager PageSizeOptions="new int[]{50, 100}" />
+    </PagerContent>
+</MudTable>
+
+<MudFab Color="Color.Primary"
+        Icon="@Icons.Material.Filled.Save"
+        Size="Size.Medium"
+        IconSize="Size.Medium"
+        Label="Copy to Clipboard"
+        Class="ma-2"
+        OnClick="CopyShoppingListToClipboard" />
+
+@code {
+    private HashSet<ShoppingListItem> selectedItems = new HashSet<ShoppingListItem>();
+
+    public List<ShoppingListItem> Elements;
+
+    protected override Task OnInitializedAsync()
+    {
+        this.Elements = applicationState.ShoppingList.Select(x => new ShoppingListItem
+        {
+            Count = x.count,
+            Promotion = x.item
+        }).ToList();
+
+        return Task.CompletedTask;
+    }
+
+    public class ShoppingListItem
+    {
+        public Promotion Promotion { get; set; }
+
+        public int Count { get; set; }
+    }
+
+    public void CopyShoppingListToClipboard()
+    {
+        var itemsByStore = this.applicationState.ShoppingList.GroupBy(x => x.item.Store);
+
+        var basketBuilder = new StringBuilder();
+
+        var totalBasketPrice = 0d;
+
+        foreach (var storeGroupd in itemsByStore)
+        {
+            var totalStorePrice = 0d;
+            basketBuilder.AppendLine(storeGroupd.Key.ToString());
+            foreach (var item in storeGroupd)
+            {
+                var singleItemPrice = item.item.Price;
+                var totalItemPrice = item.count * item.item.Price.ToDouble();
+
+                basketBuilder.AppendLine($"{item.count} x {item.item.DescriptionRaw.ReplaceNewLinesWithSingleWhitespace()} ({singleItemPrice} BGN) = {totalItemPrice} BGN");
+
+                totalBasketPrice += totalItemPrice;
+                totalStorePrice += totalItemPrice;
+            }
+
+            basketBuilder.AppendLine($"Total store price - {totalStorePrice} BGN");
+            basketBuilder.AppendLine(Environment.NewLine);
+        }
+
+        basketBuilder.AppendLine($"Total basket price - {totalBasketPrice} BGN");
+
+        this.clipboardService.WriteTextAsync(basketBuilder.ToString());
+
+        this.snackbarService.Clear();
+        this.snackbarService.Configuration.PositionClass = Defaults.Classes.Position.BottomCenter;
+        this.snackbarService.Configuration.SnackbarVariant = Variant.Outlined;
+        this.snackbarService.Add("Copied shopping list to Clipboard!", Severity.Success);
+    }
+}
