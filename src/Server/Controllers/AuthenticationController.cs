@@ -56,7 +56,7 @@ namespace Vetrina.Server.Controllers
             RefreshTokenRequest refreshTokenRequest,
             CancellationToken cancellationToken)
         {
-            refreshTokenRequest.UserId = this.CurrentUser.Id;
+            refreshTokenRequest.UserId = CurrentUser.Id;
             refreshTokenRequest.RefreshToken ??= GetRefreshTokenFromCookies();
             refreshTokenRequest.CallerIpAddress = GetCallerIpAddress();
 
@@ -87,7 +87,7 @@ namespace Vetrina.Server.Controllers
         {
             revokeTokenRequest.CallerIpAddress = GetCallerIpAddress();
             revokeTokenRequest.RefreshToken ??= GetRefreshTokenFromCookies();
-            revokeTokenRequest.UserId = this.CurrentUser.Id;
+            revokeTokenRequest.UserId = CurrentUser.Id;
 
             var revokeTokenResponse =
                 await authenticationService.RevokeTokenAsync(

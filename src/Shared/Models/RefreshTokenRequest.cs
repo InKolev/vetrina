@@ -1,3 +1,5 @@
+using Vetrina.Shared.Constants;
+
 namespace Vetrina.Shared.Models
 {
     public class RefreshTokenRequest

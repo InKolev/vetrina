@@ -124,7 +124,7 @@ namespace Vetrina.Server.Services
                         registerUserRequest.Origin,
                         cancellationToken);
 
-                    this.logger.LogWarning(
+                    logger.LogWarning(
                         $"{AuthenticationServiceConstants.FailedToRegisterEmailAlreadyInUse}({registerUserRequest.Email})");
 
                     return new RegisterUserResponse(
@@ -492,7 +492,7 @@ namespace Vetrina.Server.Services
             var tokenDescriptor =
                 new SecurityTokenDescriptor
                 {
-                    Expires = DateTime.UtcNow.AddMinutes(15),
+                    Expires = DateTime.UtcNow.Add(jwtOptions.ExpirationTime),
                     Subject =
                         new ClaimsIdentity(
                             new[]
@@ -505,7 +505,10 @@ namespace Vetrina.Server.Services
                     SigningCredentials =
                         new SigningCredentials(
                             new SymmetricSecurityKey(key),
-                            SecurityAlgorithms.HmacSha256Signature)
+                            SecurityAlgorithms.HmacSha256Signature),
+                    Issuer = jwtOptions.Issuer,
+                    Audience = jwtOptions.Audience,
+                    IssuedAt = DateTime.UtcNow,
                 };
 
             var token = tokenHandler.CreateToken(tokenDescriptor);

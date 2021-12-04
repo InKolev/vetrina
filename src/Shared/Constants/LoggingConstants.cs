@@ -1,4 +1,4 @@
-﻿namespace Vetrina.Shared.Models
+﻿namespace Vetrina.Shared.Constants
 {
     public static class LoggingConstants
     {

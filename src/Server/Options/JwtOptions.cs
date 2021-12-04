@@ -1,7 +1,15 @@
-﻿namespace Vetrina.Server.Options
+﻿using System;
+
+namespace Vetrina.Server.Options
 {
     public class JwtOptions
     {
+        public string Issuer { get; set; }
+
+        public string Audience { get; set; }
+
+        public TimeSpan ExpirationTime { get; set; }
+
         /// <summary>
         /// The secret used for signing JWTs.
         /// </summary>

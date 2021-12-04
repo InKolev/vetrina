@@ -28,75 +28,115 @@ namespace Vetrina.Server.Controllers
         }
 
         [CustomAuthorize(RoleType.SystemAdmin)]
-        [HttpGet]
-        public ActionResult<IEnumerable<UserDTO>> GetAll()
+        [HttpGet("list")]
+        public async Task<ActionResult<GetUsersResponse>> GetUsersAsync(
+            GetUsersRequest request,
+            CancellationToken cancellationToken)
         {
-            var accounts = usersService.GetAllUsers();
+            var response = await usersService.GetUsersAsync(request, cancellationToken);
 
-            return Ok(accounts);
+            return response.Type switch
+            {
+                GetUsersResponseType.Successful => Ok(response),
+                GetUsersResponseType.ValidationError => BadRequest(response),
+                GetUsersResponseType.UnexpectedFailure => InternalServerError(),
+                _ => InternalServerError()
+            };
         }
 
         [CustomAuthorize]
-        [HttpGet("{id:int}")]
-        public ActionResult<UserDTO> GetById(int id)
+        [HttpGet]
+        public async Task<ActionResult<GetUserByIdResponse>> GetUserByIdAsync(
+            GetUserByIdRequest request,
+            CancellationToken cancellationToken)
         {
             // users can get their own account and admins can get any account
-            if (id != CurrentUser.Id && CurrentUser.Role != RoleType.SystemAdmin)
+            if (request.UserId != CurrentUser.Id && CurrentUser.Role != RoleType.SystemAdmin)
+            {
                 return Unauthorized(new { message = "Unauthorized" });
+            }
 
-            var account = usersService.GetUserById(id);
-            return Ok(account);
+            var response = await usersService.GetUserByIdAsync(request, cancellationToken);
+
+            return response.Type switch
+            {
+                GetUserByIdResponseType.Successful => Ok(response),
+                GetUserByIdResponseType.ValidationError => BadRequest(response),
+                GetUserByIdResponseType.NotFound => NotFound(response),
+                GetUserByIdResponseType.UnexpectedFailure => InternalServerError(),
+                _ => InternalServerError()
+            };
         }
 
         [CustomAuthorize(RoleType.SystemAdmin)]
         [HttpPost]
-        public async Task<ActionResult<UserDTO>> Create(
-            CreateUserRequest model,
+        public async Task<ActionResult<CreateUserResponse>> CreateUserAsync(
+            CreateUserRequest request,
             CancellationToken cancellationToken)
         {
-            var account = await usersService.CreateAsync(model, cancellationToken);
-            return Ok(account);
+            var response = await usersService.CreateUserAsync(request, cancellationToken);
+
+            return response.Type switch
+            {
+                CreateUserResponseType.Successful => Ok(response),
+                CreateUserResponseType.ValidationError => BadRequest(response),
+                CreateUserResponseType.UnexpectedFailure => InternalServerError(),
+                _ => InternalServerError()
+            };
         }
 
         [CustomAuthorize]
-        [HttpPut("{id:int}")]
-        public async Task<ActionResult<UserDTO>> Update(
-            int id,
-            UpdateUserRequest model,
+        [HttpPut]
+        public async Task<ActionResult<UpdateUserResponse>> UpdateUserAsync(
+            UpdateUserRequest request,
             CancellationToken cancellationToken)
         {
-            // users can update their own account and admins can update any account
-            if (id != CurrentUser.Id && CurrentUser.Role != RoleType.SystemAdmin)
-                return Unauthorized(new { message = "Unauthorized" });
-
-            // Only admins can update role.
-            if (CurrentUser.Role != RoleType.SystemAdmin)
+            // Users can update their own account and admins can update any account
+            if (request.UserId != CurrentUser.Id && CurrentUser.Role != RoleType.SystemAdmin)
             {
-                //model.Role = null;
+                return Unauthorized(new { message = "Unauthorized" });
             }
 
-            var account = await usersService.UpdateAsync(id, model, cancellationToken);
-            return Ok(account);
+            if (CurrentUser.Role != RoleType.SystemAdmin)
+            {
+                // Keep the role the same. Only admins are allowed to update user roles.
+                request.Role = CurrentUser.Role;
+            }
+
+            var response = await usersService.UpdateUserAsync(request, cancellationToken);
+
+            return response.Type switch
+            {
+                UpdateUserResponseType.Successful => Ok(response),
+                UpdateUserResponseType.ValidationError => BadRequest(response),
+                UpdateUserResponseType.NotFound => NotFound(response),
+                UpdateUserResponseType.UnexpectedFailure => InternalServerError(),
+                _ => InternalServerError()
+            };
         }
 
         [Authorize]
         [HttpDelete("{id:int}")]
-        public async Task<IActionResult> Delete(
-            int id,
+        public async Task<ActionResult<DeleteUserResponse>> DeleteUserAsync(
+            DeleteUserRequest request,
             CancellationToken cancellationToken)
         {
             // users can delete their own account and admins can delete any account
-            if (id != CurrentUser.Id && CurrentUser.Role != RoleType.SystemAdmin)
+            if (request.UserId != CurrentUser.Id && CurrentUser.Role != RoleType.SystemAdmin)
             {
                 return Unauthorized(new { message = "Unauthorized" });
             }
 
-            await usersService.DeleteUserByIdAsync(id, cancellationToken);
-
-            return Ok(new { message = "CurrentUser deleted successfully" });
+            var response = await usersService.DeleteUserAsync(request, cancellationToken);
+         
+            return response.Type switch
+            {
+                DeleteUserResponseType.Successful => Ok(response),
+                DeleteUserResponseType.ValidationError => BadRequest(response),
+                DeleteUserResponseType.NotFound => NotFound(response),
+                DeleteUserResponseType.UnexpectedError => InternalServerError(),
+                _ => InternalServerError()
+            };
         }
-
-        // helper methods
-
     }
 }

@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using Vetrina.Shared.Models;
 
@@ -7,24 +6,24 @@ namespace Vetrina.Server.Abstractions
 {
     public interface IUsersService
     {
-        Task<IEnumerable<UserDTO>> GetAllUsers(
+        Task<GetUsersResponse> GetUsersAsync(
+            GetUsersRequest getUsersRequest,
             CancellationToken cancellationToken = default);
 
-        Task<UserDTO> GetUserById(
-            int userId,
+        Task<GetUserByIdResponse> GetUserByIdAsync(
+            GetUserByIdRequest getUserByIdRequest,
             CancellationToken cancellationToken = default);
 
-        Task<UserDTO> CreateAsync(
-            CreateUserRequest model,
+        Task<CreateUserResponse> CreateUserAsync(
+            CreateUserRequest createUserRequest,
             CancellationToken cancellationToken = default);
 
-        Task<UserDTO> UpdateAsync(
-            int userId,
-            UpdateUserRequest model,
+        Task<UpdateUserResponse> UpdateUserAsync(
+            UpdateUserRequest updateUserRequest,
             CancellationToken cancellationToken = default);
 
-        Task DeleteUserByIdAsync(
-            int userId,
+        Task<DeleteUserResponse> DeleteUserAsync(
+            DeleteUserRequest deleteUserRequest,
             CancellationToken cancellationToken = default);
     }
 }

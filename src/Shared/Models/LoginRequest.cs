@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Vetrina.Shared.Constants;
 
 namespace Vetrina.Shared.Models
 {

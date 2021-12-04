@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Vetrina.Server.Abstractions;
@@ -30,118 +31,153 @@ namespace Vetrina.Server.Services
             this.logger = logger;
         }
 
-        public async Task<IEnumerable<UserDTO>> GetAllUsers(
+        public async Task<GetUsersResponse> GetUsersAsync(
+            GetUsersRequest getUsersRequest,
             CancellationToken cancellationToken = default)
         {
-            var users = await dbContext.Users.ToListAsync(cancellationToken);
+            var skip = (getUsersRequest.Page - 1) * getUsersRequest.Limit; // TODO: add hard lower boundary for the page.
+            var take = getUsersRequest.Limit; // TODO: Add hard upper boundary for the limit. e.g. 100 entities.
 
-            return mapper.Map<List<UserDTO>>(users);
+            var users =
+                await dbContext.Users
+                    .Skip(skip)
+                    .Take(take)
+                    .ProjectTo<UserDTO>(mapper.ConfigurationProvider)
+                    .ToListAsync(cancellationToken);
+
+            return new GetUsersResponse(
+                GetUsersResponseType.Successful,
+                users);
         }
 
-        public async Task<UserDTO> GetUserById(
-            int userId,
+        public async Task<GetUserByIdResponse> GetUserByIdAsync(
+            GetUserByIdRequest getUserByIdRequest,
             CancellationToken cancellationToken = default)
         {
             var user =
-                await dbContext.Users.FirstOrDefaultAsync(
-                    x => x.Id == userId,
-                    cancellationToken);
+                await dbContext.Users
+                    .ProjectTo<UserDTO>(mapper.ConfigurationProvider)
+                    .FirstOrDefaultAsync(
+                        x => x.Id == getUserByIdRequest.UserId,
+                        cancellationToken);
 
             if (user == null)
             {
-                throw new Exception($"User with the provided Id({userId}) does not exist.");
+                return new GetUserByIdResponse(
+                    GetUserByIdResponseType.NotFound,
+                    $"User with the provided Id ({getUserByIdRequest.UserId}) does not exist.");
             }
 
-            return mapper.Map<UserDTO>(user);
+            return new GetUserByIdResponse(
+                GetUserByIdResponseType.Successful,
+                user);
         }
 
-        public async Task<UserDTO> CreateAsync(
-            CreateUserRequest model,
+        public async Task<CreateUserResponse> CreateUserAsync(
+            CreateUserRequest createUserRequest,
             CancellationToken cancellationToken)
         {
-            var accountWithThatEmailsAlreadyExists =
+            var accountWithThatEmailAlreadyExists =
                 await dbContext.Users.AnyAsync(
-                    a => a.Email == model.Email,
+                    a => a.Email == createUserRequest.Email,
                     cancellationToken);
 
-            if (accountWithThatEmailsAlreadyExists)
+            if (accountWithThatEmailAlreadyExists)
             {
-                throw new Exception($"Email '{model.Email}' is already registered");
+                return new CreateUserResponse(
+                    CreateUserResponseType.ValidationError,
+                    $"Email '{createUserRequest.Email}' is already registered.");
             }
 
             // map forgotPasswordRequest to new account object
-            var user = mapper.Map<User>(model);
+            var user = mapper.Map<User>(createUserRequest);
             user.Created = DateTime.UtcNow;
             user.Verified = DateTime.UtcNow;
+            user.PasswordHash = BC.HashPassword(createUserRequest.Password);
 
-            // hash password
-            user.PasswordHash = BC.HashPassword(model.Password);
-
-            // save account
             dbContext.Users.Add(user);
+            
             var affectedRows = await dbContext.SaveChangesAsync(cancellationToken);
 
-            return mapper.Map<UserDTO>(user);
+            var userDto = mapper.Map<UserDTO>(user);
+
+            return new CreateUserResponse(
+                CreateUserResponseType.Successful,
+                userDto);
         }
 
-        public async Task<UserDTO> UpdateAsync(
-            int userId,
-            UpdateUserRequest model,
-            CancellationToken cancellationToken)
-        {
-            var account =
-                await dbContext.Users.FirstOrDefaultAsync(
-                    x => x.Id == userId,
-                    cancellationToken);
-
-            if (account == null)
-            {
-
-            }
-
-            // validate
-            if (account.Email != model.Email && dbContext.Users.Any(x => x.Email == model.Email))
-            {
-                throw new Exception($"Email '{model.Email}' is already taken");
-            }
-
-            // hash password if it was entered
-            if (!string.IsNullOrEmpty(model.Password))
-            {
-                account.PasswordHash = BC.HashPassword(model.Password);
-            }
-
-            // copy forgotPasswordRequest to account and save
-            mapper.Map(model, account);
-            account.Updated = DateTime.UtcNow;
-            dbContext.Users.Update(account);
-            var affectedRows = await dbContext.SaveChangesAsync(cancellationToken);
-
-            return mapper.Map<UserDTO>(account);
-        }
-
-        public async Task DeleteUserByIdAsync(
-            int userId,
+        public async Task<UpdateUserResponse> UpdateUserAsync(
+            UpdateUserRequest updateUserRequest,
             CancellationToken cancellationToken)
         {
             var user =
                 await dbContext.Users.FirstOrDefaultAsync(
-                    x => x.Id == userId,
+                    x => x.Id == updateUserRequest.UserId,
                     cancellationToken);
 
             if (user == null)
             {
-                throw new Exception($"User with the provided Id({userId}) does not exist.");
+                return new UpdateUserResponse(
+                    UpdateUserResponseType.NotFound,
+                    $"User with the provided Id ({updateUserRequest.UserId}) was not found.");
+            }
+
+            if (user.Email != updateUserRequest.Email 
+                && await dbContext.Users.AnyAsync(x => x.Email == updateUserRequest.Email, cancellationToken: cancellationToken))
+            {
+                return new UpdateUserResponse(
+                    UpdateUserResponseType.ValidationError,
+                    $"Email '{updateUserRequest.Email}' is already taken");
+            }
+
+            if (!string.IsNullOrEmpty(updateUserRequest.Password))
+            {
+                user.PasswordHash = BC.HashPassword(updateUserRequest.Password);
+            }
+
+            // Copy forgotPasswordRequest to account and save
+            mapper.Map(updateUserRequest, user);
+            
+            user.Updated = DateTime.UtcNow;
+
+            dbContext.Users.Update(user);
+            var affectedRows = await dbContext.SaveChangesAsync(cancellationToken);
+
+            var userDto = mapper.Map<UserDTO>(user);
+
+            return new UpdateUserResponse(
+                UpdateUserResponseType.Successful,
+                userDto);
+        }
+
+        public async Task<DeleteUserResponse> DeleteUserAsync(
+            DeleteUserRequest deleteUserRequest,
+            CancellationToken cancellationToken)
+        {
+            var user =
+                await dbContext.Users.FirstOrDefaultAsync(
+                    x => x.Id == deleteUserRequest.UserId,
+                    cancellationToken);
+
+            if (user == null)
+            {
+                return new DeleteUserResponse(
+                    DeleteUserResponseType.NotFound,
+                    $"User with the provided Id ({deleteUserRequest.UserId}) does not exist.");
             }
 
             dbContext.Users.Remove(user);
+
             var affectedRows = await dbContext.SaveChangesAsync(cancellationToken);
             if (affectedRows == 0)
             {
-                // return error
+                return new DeleteUserResponse(
+                    DeleteUserResponseType.UnexpectedError,
+                    "Zero database records were affected by the operation.");
             }
 
-            // return ok deleted
+            return new DeleteUserResponse(
+                DeleteUserResponseType.Successful);
         }
     }
 }
