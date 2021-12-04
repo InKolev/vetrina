@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Vetrina.Server.Persistence;
 
 namespace Vetrina.Server.Migrations
 {
     [DbContext(typeof(VetrinaDbContext))]
-    partial class VetrinaDbContextModelSnapshot : ModelSnapshot
+    [Migration("20211204222941_Initial_Create_Vetrina_Database")]
+    partial class Initial_Create_Vetrina_Database
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
