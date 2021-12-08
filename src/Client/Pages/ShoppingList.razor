@@ -7,6 +7,7 @@
 @inject IClipboardService clipboardService;
 @inject ISnackbar snackbarService;
 
+<div style="margin-bottom: 40px;"></div>
 <MudTable Items="@Elements" MultiSelection="true" @bind-SelectedItems="selectedItems" Hover="true">
     <HeaderContent>
         <MudTh>Product</MudTh>
@@ -27,7 +28,7 @@
     </PagerContent>
 </MudTable>
 
-<MudFab Color="Color.Primary"
+<MudFab Color="applicationState.MainThemeColor"
         Icon="@Icons.Material.Filled.Save"
         Size="Size.Medium"
         IconSize="Size.Medium"
@@ -42,6 +43,8 @@
 
     protected override Task OnInitializedAsync()
     {
+        this.applicationState.ThemeColorChanged += StateHasChanged;
+
         this.Elements = applicationState.ShoppingList.Select(x => new ShoppingListItem
         {
             Count = x.count,
@@ -93,5 +96,15 @@
         this.snackbarService.Configuration.PositionClass = Defaults.Classes.Position.BottomCenter;
         this.snackbarService.Configuration.SnackbarVariant = Variant.Outlined;
         this.snackbarService.Add("Copied shopping list to Clipboard!", Severity.Success);
+    }
+
+    protected override void OnInitialized()
+    {
+        this.applicationState.ThemeColorChanged += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        this.applicationState.ThemeColorChanged -= StateHasChanged;
     }
 }
