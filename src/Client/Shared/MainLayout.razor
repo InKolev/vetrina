@@ -4,31 +4,54 @@
 @inherits LayoutComponentBase
 
 
-@inject ApplicationState ApplicationState;
+@inject ApplicationState applicationState;
 
 <MudThemeProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
 
 <MudLayout>
-    <MudAppBar Elevation="1" Color="ApplicationState.MainThemeColor">
-        <MudIconButton Icon="@Icons.Material.Filled.Brightness6" Color="Color.Inherit" Edge="Edge.End" OnClick="ApplicationState.SwitchColor" />
+    <MudAppBar Elevation="1" Color="applicationState.MainThemeColor">
+        <MudIconButton Icon="@Icons.Material.Filled.Brightness6" Color="Color.Inherit" Edge="Edge.End" OnClick="applicationState.SwitchColor" />
         <MudSpacer />
 
         <AuthorizeView>
             <Authorized>
-                <p>Hi, @context.User.Identity.Name</p>
-                <MudIconButton Link="/LogoutUser" Target="_self" Icon="@Icons.Material.Filled.Logout" Color="Color.Inherit" Edge="Edge.End" />
+                <p>Hi, @context.User.Identity?.Name</p>
+                <MudButton Link="/"
+                           Target="_self"
+                           StartIcon="@Icons.Material.Filled.Home"
+                           Color="Color.Inherit">НАЧАЛО</MudButton>
+                <MudButton Link="/LogoutUser"
+                           Target="_self"
+                           StartIcon="@Icons.Material.Filled.Logout"
+                           Color="Color.Inherit">ИЗХОД</MudButton>
             </Authorized>
             <NotAuthorized>
-                <p>Hi there, anonymous friend</p>
-                <MudIconButton Link="/LoginUser" Target="_self" Icon="@Icons.Material.Filled.Login" Color="Color.Inherit" Edge="Edge.End" />
-                <MudIconButton Link="/RegisterUser" Target="_self" Icon="@Icons.Material.Filled.HowToReg" Color="Color.Inherit" Edge="Edge.End" />
+                <MudButton Link="/"
+                           Target="_self"
+                           StartIcon="@Icons.Material.Filled.Home"
+                           Color="Color.Inherit">НАЧАЛО</MudButton>
+                <MudButton Link="/LoginUser"
+                           Target="_self"
+                           StartIcon="@Icons.Material.Filled.Login"
+                           Color="Color.Inherit">ВХОД</MudButton>
+                <MudButton Link="/RegisterUser"
+                           Target="_self"
+                           StartIcon="@Icons.Material.Filled.HowToReg"
+                           Color="Color.Inherit">РЕГИСТРАЦИЯ</MudButton>
             </NotAuthorized>
         </AuthorizeView>
 
-        <MudBadge Content="ApplicationState.ShoppingList.Count()" Color="Color.Tertiary" Overlap="true" Class="mx-6 my-4">
-            <MudIconButton Link="/ShoppingList" Target="_self" Icon="@Icons.Material.Filled.FoodBank" Color="Color.Inherit" Edge="Edge.End" />
+        <MudBadge Content="applicationState.ShoppingList.Count()"
+                  Color="Color.Tertiary"
+                  Overlap="true"
+                  Class="mx-6 my-4">
+
+            <MudButton Link="/ShoppingList"
+                       Target="_self"
+                       EndIcon="@Icons.Material.Filled.FoodBank"
+                       Color="Color.Inherit">СПИСЪК</MudButton>
         </MudBadge>
     </MudAppBar>
     <MudMainContent>
@@ -39,11 +62,11 @@
 @code {
     protected override void OnInitialized()
     {
-        this.ApplicationState.ShoppingListChanged += StateHasChanged;
+        this.applicationState.ShoppingListChanged += StateHasChanged;
     }
 
     public void Dispose()
     {
-        this.ApplicationState.ShoppingListChanged -= StateHasChanged;
+        this.applicationState.ShoppingListChanged -= StateHasChanged;
     }
 }
