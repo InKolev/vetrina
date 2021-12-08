@@ -21,15 +21,15 @@
             <MudGrid>
                 <MudItem sm="1" md="1"></MudItem>
                 <MudItem xs="12" sm="10" md="10">
-                    <MudTextField DebounceInterval="400" 
-                                  OnDebounceIntervalElapsed="Search"
-                                  @bind-Value="SearchPromotionsRequest.SearchTerm" 
+                    <MudTextField DebounceInterval="400"
+                                  OnDebounceIntervalElapsed="SearchAsync"
+                                  @bind-Value="SearchPromotionsRequest.SearchTerm"
                                   Immediate="true"
-                                  Label="Търси" 
-                                  Margin="Margin.Dense" 
+                                  Label="Търси"
+                                  Margin="Margin.Dense"
                                   Variant="Variant.Outlined"
-                                  Adornment="Adornment.End" 
-                                  AdornmentIcon="@Icons.Filled.Search" 
+                                  Adornment="Adornment.End"
+                                  AdornmentIcon="@Icons.Filled.Search"
                                   AdornmentColor="Color.Secondary" />
                 </MudItem>
                 <MudItem sm="1" md="1"></MudItem>
@@ -61,8 +61,8 @@
             @if (this.SearchPromotionsResponse != null)
             {
                 <MudText Align="Align.Center" Typo="Typo.body2" Color="Color.Default" Style="opacity: 0.8; font-style: oblique;">
-                    Върнати са @this.SearchPromotionsResponse.Documents.Count от общо @this.SearchPromotionsResponse.TotalHits резултати 
-                    за @(this.EndToEndLatencySecs) секунди (@this.NetworkLatencySecs + @this.ServerProcessingTimeSecs)
+                    Върнати са @this.SearchPromotionsResponse.Documents.Count от общо @this.SearchPromotionsResponse.TotalHits резултати
+                    за @(this.EndToEndLatencySecs) секунди
                 </MudText>
             }
         </MudItem>
@@ -127,7 +127,7 @@
     public double NetworkLatencySecs { get; set; }
     public double ServerProcessingTimeSecs { get; set; }
 
-    public async Task Search(string searchTerm)
+    public async Task SearchAsync(string searchTerm)
     {
         if (string.IsNullOrWhiteSpace(searchTerm))
         {
