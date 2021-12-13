@@ -47,14 +47,14 @@ namespace Vetrina.Server.Services
                 // re-using a connection can significantly improve the performance when sending
                 // a large number of messages to the same SMTP server over a short period of time.
                 await smtpClient.ConnectAsync(
-                    smtpOptions.SmtpHost,
-                    smtpOptions.SmtpPort,
+                    host: smtpOptions.SmtpHost,
+                    port: smtpOptions.SmtpPort,
                     SecureSocketOptions.StartTls,
                     cancellationToken);
 
                 await smtpClient.AuthenticateAsync(
-                    smtpOptions.SmtpUser,
-                    smtpOptions.SmtpPass,
+                    userName: smtpOptions.SmtpUser,
+                    password: smtpOptions.SmtpPass,
                     cancellationToken);
 
                 await smtpClient.SendAsync(

@@ -1,9 +1,12 @@
-﻿using System.Net.Http;
+﻿using System;
+using System.Linq;
+using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components.Authorization;
+using Vetrina.Client.Constants;
 
 namespace Vetrina.Client.Services
 {
@@ -14,7 +17,7 @@ namespace Vetrina.Client.Services
         private readonly AuthenticationState anonymous;
 
         public CustomAuthenticationStateProvider(
-            HttpClient httpClient, 
+            HttpClient httpClient,
             ILocalStorageService localStorage)
         {
             this.httpClient = httpClient;
@@ -24,27 +27,40 @@ namespace Vetrina.Client.Services
 
         public override async Task<AuthenticationState> GetAuthenticationStateAsync()
         {
-            var token = await localStorage.GetItemAsync<string>("authToken");
+            var token = await localStorage.GetItemAsync<string>(AuthenticationConstants.LocalStorageAuthTokenKey);
             if (string.IsNullOrWhiteSpace(token))
             {
                 return anonymous;
             }
 
-            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", token);
-            return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity(JwtParser.ParseClaimsFromJwt(token), "jwtAuthType")));
-        }
+            httpClient.DefaultRequestHeaders.Authorization =
+                new AuthenticationHeaderValue(
+                    "bearer",
+                    token);
 
-        public void NotifyUserAuthentication(string email)
+            var authenticationState =
+                new AuthenticationState(
+                    new ClaimsPrincipal(
+                        new ClaimsIdentity(
+                            claims: JwtParser.ParseClaimsFromJwt(token),
+                            authenticationType: "jwtAuthType",
+                            nameType: ClaimTypes.Name,
+                            roleType: ClaimTypes.Role)));
+
+            var name = authenticationState.User.Claims.FirstOrDefault(x => string.Equals(x.Type, "name", StringComparison.OrdinalIgnoreCase));
+            var claimValues = authenticationState.User.Claims.Select(x => x.Value).ToList();
+
+            return authenticationState;
+        }
+            
+        public void NotifyUserAuthenticated()
         {
-            var authenticatedUser = new ClaimsPrincipal(new ClaimsIdentity(new[] { new Claim(ClaimTypes.Name, email) }, "jwtAuthType"));
-            var authState = Task.FromResult(new AuthenticationState(authenticatedUser));
-            NotifyAuthenticationStateChanged(authState);
+            NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
         }
 
         public void NotifyUserLogout()
         {
-            var authState = Task.FromResult(anonymous);
-            NotifyAuthenticationStateChanged(authState);
+            NotifyAuthenticationStateChanged(Task.FromResult(anonymous));
         }
     }
 }

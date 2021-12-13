@@ -103,6 +103,7 @@ namespace Vetrina.Server
 
             // Configure options.
             services.Configure<JwtOptions>(Configuration.GetSection(nameof(JwtOptions)));
+            services.Configure<SmtpOptions>(Configuration.GetSection(nameof(SmtpOptions)));
 
             // Add services.
             services.AddScoped<IUsersService, UsersService>();
@@ -185,6 +186,7 @@ namespace Vetrina.Server
                 endpoints.MapRazorPages();
                 endpoints.MapControllers();
                 endpoints.MapFallbackToFile("index.html");
+                endpoints.MapHangfireDashboard();
             });
         }
 

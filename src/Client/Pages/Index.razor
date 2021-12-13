@@ -6,10 +6,10 @@
 @using Vetrina.Shared.Request
 @using Vetrina.Shared.SearchModels
 
-@inject HttpClient HttpClient;
-@inject ISnackbar SnackbarService;
-@inject ILocalStorageService LocalStorageService;
-@inject ApplicationState ApplicationState;
+@inject HttpClient httpClient;
+@inject ISnackbar snackbarService;
+@inject ILocalStorageService localStorageService;
+@inject ApplicationState applicationState;
 
 <MudContainer Class="mt-16">
     <MudText Typo="Typo.h4" Align="Align.Center" GutterBottom="true">
@@ -97,10 +97,10 @@
                             </MudCardHeader>
                             <MudCardMedia Image="@promotion.Document.ImageUrl" Height="200" />
                             <MudCardContent>
-                                <MudButton OnClick="() => ApplicationState.AddPromotionalItemToShoppingList(promotion.Document)"
+                                <MudButton OnClick="() => applicationState.AddPromotionalItemToShoppingList(promotion.Document)"
                                            StartIcon="@Icons.Material.Outlined.Add"
                                            FullWidth="true"
-                                           Color="ApplicationState.MainThemeColor"
+                                           Color="applicationState.MainThemeColor"
                                            Variant="Variant.Filled">
                                     @($"{promotion.Document.Price} BGN")
                                 </MudButton>
@@ -139,16 +139,16 @@
 
         this.Stopwatch.Restart();
 
-        var httpResponse = await this.HttpClient.PostAsJsonAsync("/api/SearchPromotions", SearchPromotionsRequest);
+        var httpResponse = await this.httpClient.PostAsJsonAsync("/api/SearchPromotions", SearchPromotionsRequest);
 
         this.Stopwatch.Stop();
 
         if (httpResponse.IsSuccessStatusCode)
         {
-            this.SnackbarService.Clear();
-            this.SnackbarService.Configuration.PositionClass = Defaults.Classes.Position.BottomCenter;
-            this.SnackbarService.Configuration.SnackbarVariant = Variant.Outlined;
-            this.SnackbarService.Add("Searching for goodies...", Severity.Success);
+            this.snackbarService.Clear();
+            this.snackbarService.Configuration.PositionClass = Defaults.Classes.Position.BottomCenter;
+            this.snackbarService.Configuration.SnackbarVariant = Variant.Outlined;
+            this.snackbarService.Add("Searching for goodies...", Severity.Success);
             this.SearchPromotionsResponse = await httpResponse.Content.ReadFromJsonAsync<LuceneSearchResponse<Promotion>>();
 
             this.EndToEndLatencySecs = Math.Round(this.Stopwatch.Elapsed.TotalMilliseconds / 1000, 2, MidpointRounding.AwayFromZero);
@@ -157,11 +157,11 @@
         }
         else
         {
-            this.SnackbarService.Clear();
-            this.SnackbarService.Configuration.PositionClass = Defaults.Classes.Position.BottomCenter;
-            this.SnackbarService.Configuration.SnackbarVariant = Variant.Outlined;
-            this.SnackbarService.Add("Failed while searching for promotions...", Severity.Error);
-            this.SnackbarService.Add($"Reason: {httpResponse.ReasonPhrase}", Severity.Error);
+            this.snackbarService.Clear();
+            this.snackbarService.Configuration.PositionClass = Defaults.Classes.Position.BottomCenter;
+            this.snackbarService.Configuration.SnackbarVariant = Variant.Outlined;
+            this.snackbarService.Add("Failed while searching for promotions...", Severity.Error);
+            this.snackbarService.Add($"Reason: {httpResponse.ReasonPhrase}", Severity.Error);
         }
 
         this.LoadingSearchResults = false;
@@ -169,11 +169,11 @@
 
     protected override void OnInitialized()
     {
-        this.ApplicationState.ThemeColorChanged += StateHasChanged;
+        this.applicationState.ThemeColorChanged += StateHasChanged;
     }
 
     public void Dispose()
     {
-        this.ApplicationState.ThemeColorChanged -= StateHasChanged;
+        this.applicationState.ThemeColorChanged -= StateHasChanged;
     }
 }

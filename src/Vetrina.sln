@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31911.196
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vetrina.Server", "Server\Vetrina.Server.csproj", "{0548A6B9-3DEB-4597-8524-66133E49C38D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Vetrina.Server", "Server\Vetrina.Server.csproj", "{0548A6B9-3DEB-4597-8524-66133E49C38D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vetrina.Client", "Client\Vetrina.Client.csproj", "{09927405-C6A6-4AFF-809C-C7BF73104CEF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Vetrina.Client", "Client\Vetrina.Client.csproj", "{09927405-C6A6-4AFF-809C-C7BF73104CEF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vetrina.Shared", "Shared\Vetrina.Shared.csproj", "{3FBE44F4-62EA-49FB-B516-09B5FB40A73B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Vetrina.Shared", "Shared\Vetrina.Shared.csproj", "{3FBE44F4-62EA-49FB-B516-09B5FB40A73B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

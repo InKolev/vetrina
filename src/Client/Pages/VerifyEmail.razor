@@ -1,0 +1,41 @@
+﻿@page "/verify-email/{verificationToken}"
+@using Vetrina.Autogen.API.Client.Contracts
+@using Vetrina.Client.Constants
+
+@inject IAuthenticationClient authenticationClient;
+@inject ISnackbar snackbarService;
+@inject NavigationManager navigationManager;
+
+<h3>@Message</h3>
+
+@code {
+    [Parameter]
+    public string VerificationToken { get; set; }
+
+    public string Message { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var verifyEmailRequest = new VerifyEmailRequest { VerificationToken = VerificationToken };
+        var verifyEmailResponse = await authenticationClient.VerifyEmailAsync(verifyEmailRequest);
+
+        if (verifyEmailResponse.Type == VerifyEmailResponseType.Successful)
+        {
+            this.snackbarService.Add(
+                "Успешно потвърдихте имейлът си. След вход в системата, вече ще имате достъп до пълният набор от функциналности.",
+                Severity.Success,
+                options => options.RequireInteraction = true);
+        }
+        else
+        {
+            this.snackbarService.Add(
+                "Потвърждението на имейлът Ви беше неуспешно.",
+                Severity.Success,
+                options => options.RequireInteraction = true);
+
+            // Log verifyEmailResponse.Details
+        }
+
+        navigationManager.NavigateTo(NavigationConstants.Home);
+    }
+}

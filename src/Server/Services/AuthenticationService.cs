@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -495,12 +496,12 @@ namespace Vetrina.Server.Services
                     Expires = DateTime.UtcNow.Add(jwtOptions.ExpirationTime),
                     Subject =
                         new ClaimsIdentity(
-                            new[]
+                            new List<Claim>
                             {
-                                new Claim("id", user.Id.ToString()),
-                                new Claim("username", user.UserName),
-                                new Claim("email", user.Email),
-                                new Claim("role", user.Role.ToString())
+                                new Claim(ClaimTypes.Email, user.Email),
+                                new Claim(ClaimTypes.Role, user.Role.ToString()),
+                                new Claim("name", $"{user.FirstName} {user.LastName}"),
+                                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                             }),
                     SigningCredentials =
                         new SigningCredentials(
@@ -553,7 +554,7 @@ namespace Vetrina.Server.Services
             string message;
             if (!string.IsNullOrEmpty(origin))
             {
-                var verifyUrl = $"{origin}/user/verify-email?token={verificationToken}";
+                var verifyUrl = $"{origin}/verify-email/{verificationToken}";
                 message = $@"<p>Please click the below link to verify your email address:</p>
                              <p><a href=""{verifyUrl}"">{verifyUrl}</a></p>";
             }

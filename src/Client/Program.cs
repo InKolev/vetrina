@@ -37,7 +37,7 @@ namespace Vetrina.Client
             builder.Services.AddOptions();
             builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
             builder.Services.AddAuthorizationCore();
-            //builder.Services.AddAuthenticationCore();
+            builder.Services.AddAuthenticationCore();
 
             await builder.Build().RunAsync();
         }

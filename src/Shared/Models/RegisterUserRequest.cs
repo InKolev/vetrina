@@ -17,9 +17,6 @@ namespace Vetrina.Shared.Models
         public string LastName { get; set; }
 
         [Required]
-        public string UserName { get; set; }
-
-        [Required]
         [EmailAddress]
         public string Email { get; set; }
 
@@ -43,7 +40,6 @@ namespace Vetrina.Shared.Models
                 Origin = this.Origin,
                 LastName = this.LastName,
                 FirstName = this.FirstName,
-                UserName = this.UserName,
                 AcceptTerms = this.AcceptTerms,
                 Password = LoggingConstants.MaskedValue,
                 ConfirmPassword = LoggingConstants.MaskedValue,

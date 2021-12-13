@@ -1,8 +1,6 @@
-﻿@using Microsoft.AspNetCore.Components.Authorization
-@using Vetrina.Client.Services
+﻿@using Vetrina.Client.Services
 
 @inherits LayoutComponentBase
-
 
 @inject ApplicationState applicationState;
 
@@ -11,56 +9,33 @@
 <MudSnackbarProvider />
 
 <MudLayout>
-    <MudAppBar Elevation="1" Color="applicationState.MainThemeColor">
+    <MudAppBar Elevation="1" Color="applicationState.MainThemeColor" Fixed="true">
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="ToggleDrawer" />
+        <MudSpacer />
         <MudIconButton Icon="@Icons.Material.Filled.Brightness6" Color="Color.Inherit" Edge="Edge.End" OnClick="applicationState.SwitchColor" />
         <MudSpacer />
-
-        <AuthorizeView>
-            <Authorized>
-                <p>Hi, @context.User.Identity?.Name</p>
-                <MudButton Link="/"
-                           Target="_self"
-                           StartIcon="@Icons.Material.Filled.Home"
-                           Color="Color.Inherit">НАЧАЛО</MudButton>
-                <MudButton Link="/LogoutUser"
-                           Target="_self"
-                           StartIcon="@Icons.Material.Filled.Logout"
-                           Color="Color.Inherit">ИЗХОД</MudButton>
-            </Authorized>
-            <NotAuthorized>
-                <MudButton Link="/"
-                           Target="_self"
-                           StartIcon="@Icons.Material.Filled.Home"
-                           Color="Color.Inherit">НАЧАЛО</MudButton>
-                <MudButton Link="/LoginUser"
-                           Target="_self"
-                           StartIcon="@Icons.Material.Filled.Login"
-                           Color="Color.Inherit">ВХОД</MudButton>
-                <MudButton Link="/RegisterUser"
-                           Target="_self"
-                           StartIcon="@Icons.Material.Filled.HowToReg"
-                           Color="Color.Inherit">РЕГИСТРАЦИЯ</MudButton>
-            </NotAuthorized>
-        </AuthorizeView>
-
-        <MudBadge Content="applicationState.ShoppingList.Count()"
-                  Color="Color.Tertiary"
-                  Overlap="true"
-                  Class="mx-6 my-4">
-
-            <MudButton Link="/ShoppingList"
-                       Target="_self"
-                       EndIcon="@Icons.Material.Filled.FoodBank"
-                       Color="Color.Inherit">СПИСЪК</MudButton>
+        <MudBadge Content="applicationState.ShoppingList.Count()" Color="Color.Error" Overlap="true" Class="mx-6 my-4">
+            <MudIconButton Link="/shopping-list" Target="_self" Icon="@Icons.Material.Filled.FoodBank" Color="Color.Inherit" Edge="Edge.End" />
         </MudBadge>
     </MudAppBar>
+    <MudDrawer @bind-Open="DrawerOpen" ClipMode="DrawerClipMode.Docked" Elevation="2">
+        <MudDrawerHeader>
+            <MudText Typo="Typo.h6" Align="Align.Center" Style="letter-spacing: 2.5px;">
+                VETRINA <br />
+                <MudText Typo="Typo.caption" Align="Align.Center">Promotions search on steroids</MudText>
+            </MudText>
+        </MudDrawerHeader>
+        <NavMenu></NavMenu>
+    </MudDrawer>
     <MudMainContent>
         @Body
     </MudMainContent>
 </MudLayout>
 
 @code {
-    protected override void OnInitialized()
+    public bool DrawerOpen { get; set; } = false;
+
+    protected override async Task OnInitializedAsync()
     {
         this.applicationState.ShoppingListChanged += StateHasChanged;
     }
@@ -68,5 +43,10 @@
     public void Dispose()
     {
         this.applicationState.ShoppingListChanged -= StateHasChanged;
+    }
+
+    public void ToggleDrawer()
+    {
+        this.DrawerOpen = !this.DrawerOpen;
     }
 }

@@ -1,22 +1,20 @@
-﻿@*@page "/RegisterUser"
-@using global::Client.CSharp.Contracts
+﻿@page "/register"
+
 @using Microsoft.AspNetCore.Components.Authorization
 @using InputType = MudBlazor.InputType
 @using Blazored.LocalStorage
-@using System.Net.Http.Headers
 @using Microsoft.AspNetCore.Components
+@using Vetrina.Autogen.API.Client.Contracts
 @using Vetrina.Client.Constants
-@using Vetrina.Client.Services
-@using Vetrina.Shared.Models
 
 @inject ISnackbar snackbarService;
-@inject IAccountClient accountClient;
+@inject IAuthenticationClient authenticationClient;
 @inject ILocalStorageService localStorage;
 @inject AuthenticationStateProvider authenticationStateProvider;
 @inject HttpClient httpClient;
 @inject NavigationManager navigationManager;
 
-<MudText GutterBottom="true"></MudText>
+<div style="margin-bottom: 150px;"></div>
 
 <MudContainer Class="d-flex justify-center align-center">
     <MudCard Class="align-self-center" Style="width: 500px;">
@@ -29,13 +27,27 @@
         <EditForm Model="@registerUserRequest" OnValidSubmit="@OnValidSubmitHandler">
             <DataAnnotationsValidator />
             <MudCardContent>
+                <MudSelect @bind-Value="registerUserRequest.Title"
+                           For="@(() => registerUserRequest.Title)"
+                           T="string"
+                           Label="Title"
+                           AnchorOrigin="Origin.BottomCenter">
+                    <MudSelectItem Value="@("Mr")" />
+                    <MudSelectItem Value="@("Mrs")" />
+                    <MudSelectItem Value="@("Miss")" />
+                </MudSelect>
+
+                <MudTextField @bind-Value="registerUserRequest.FirstName"
+                              For="@(() => registerUserRequest.FirstName)"
+                              Label="First name" />
+
+                <MudTextField @bind-Value="registerUserRequest.LastName"
+                              For="@(() => registerUserRequest.LastName)"
+                              Label="Last name" />
+
                 <MudTextField @bind-Value="registerUserRequest.Email"
                               For="@(() => registerUserRequest.Email)"
                               Label="Email" />
-
-                <MudTextField @bind-Value="registerUserRequest.UserName"
-                              For="@(() => registerUserRequest.UserName)"
-                              Label="Username" />
 
                 <MudTextField @bind-Value="registerUserRequest.Password"
                               For="@(() => registerUserRequest.Password)"
@@ -45,10 +57,15 @@
 
                 <MudTextField @bind-Value="registerUserRequest.ConfirmPassword"
                               For="@(() => registerUserRequest.ConfirmPassword)"
-                              Label="Confirm Password"
+                              Label="Confirm password"
                               HelperText="Confirm the password"
                               InputType="InputType.Password" />
 
+                <MudCheckBox @bind-Checked="@registerUserRequest.AcceptTerms"
+                             For="@(() => registerUserRequest.AcceptTerms)">
+                    I have read and agree to the terms presented in the
+                    <MudLink Href="#" Underline="Underline.Always">Terms and Conditions agreement</MudLink>
+                </MudCheckBox>
             </MudCardContent>
 
             <MudCardActions>
@@ -63,23 +80,32 @@
 </MudContainer>
 @code {
     private bool disableRegistration = false;
-    readonly RegisterUserRequest registerUserRequest = new RegisterUserRequest();
+    readonly RegisterUserRequest registerUserRequest = new RegisterUserRequest
+    {
+        Title = "Mr",
+        AcceptTerms = true,
+        FirstName = "Ivan",
+        LastName = "Kolev",
+        Password = "123123",
+        ConfirmPassword = "123123",
+        Email = "in.kolev.b@gmail.com"
+    };
 
     private async Task OnValidSubmitHandler()
     {
         this.snackbarService.Add(
-            "Registration form valid. Attempting to login...",
+            "Registration form valid. Attempting to register...",
             Severity.Info);
 
         RegisterUserResponse registerUserResponse = null;
         try
         {
-            registerUserResponse = await accountClient.RegisterUserAsync(this.registerUserRequest);
+            registerUserResponse = await authenticationClient.RegisterAsync(this.registerUserRequest);
         }
         catch (SwaggerException<RegisterUserResponse> e)
         {
             this.snackbarService.Add(
-                $"Login attempt failed. Reason: {e.Result.ErrorMessage}.",
+                $"Login attempt failed. Reason: {e.Result.Details}.",
                 Severity.Error);
 
             return;
@@ -93,23 +119,24 @@
             return;
         }
 
-        if (registerUserResponse.IsSuccessful)
+        if (registerUserResponse.Type == RegisterUserResponseType.Successful)
         {
-            await localStorage.SetItemAsync(
-                AuthenticationConstants.LocalStorageAuthTokenKey,
-                registerUserResponse.Token);
+            //await localStorage.SetItemAsync(
+            //    AuthenticationConstants.LocalStorageAuthTokenKey,
+            //    registerUserResponse.Токен);
 
-            ((CustomAuthenticationStateProvider)authenticationStateProvider).NotifyUserAuthentication(
-                this.registerUserRequest.Email);
+            //((CustomAuthenticationStateProvider)authenticationStateProvider)
+            //    .NotifyUserAuthenticated(
+            //        this.registerUserRequest.UserName);
 
-            httpClient.DefaultRequestHeaders.Authorization =
-                new AuthenticationHeaderValue(
-                    AuthenticationConstants.AuthorizationHeaderScheme,
-                    registerUserResponse.Token);
+            //httpClient.DefaultRequestHeaders.Authorization =
+            //    new AuthenticationHeaderValue(
+            //        AuthenticationConstants.AuthorizationHeaderScheme,);
 
             this.snackbarService.Add(
-                "Successfully registered and logged in user.",
-                Severity.Success);
+                "Successfully registered user. Confirmation link has been sent to your email.",
+                Severity.Success,
+                options => options.RequireInteraction = true);
 
             this.navigationManager.NavigateTo(
                 NavigationConstants.Home);
@@ -117,8 +144,8 @@
         else
         {
             this.snackbarService.Add(
-                $"Failed to register user. Reason: {registerUserResponse.ErrorMessage}.",
+                $"Failed to register user. Reason: {registerUserResponse.Details}.",
                 Severity.Warning);
         }
     }
-}*@
+}

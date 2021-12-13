@@ -1,15 +1,15 @@
-﻿@*@page "/LoginUser"
-@using global::Client.CSharp.Contracts
+﻿@page "/login"
+
 @using Microsoft.AspNetCore.Components.Authorization
 @using InputType = MudBlazor.InputType
 @using Blazored.LocalStorage
 @using System.Net.Http.Headers
+@using Vetrina.Autogen.API.Client.Contracts
 @using Vetrina.Client.Constants
 @using Vetrina.Client.Services
-@using Vetrina.Shared.Models
 
 @inject ISnackbar snackbarService;
-@inject IAccountClient accountClient;
+@inject IAuthenticationClient authenticationClient;
 @inject ILocalStorageService localStorage;
 @inject AuthenticationStateProvider authenticationStateProvider;
 @inject HttpClient httpClient;
@@ -64,12 +64,12 @@
         LoginResponse loginUserResponse = null;
         try
         {
-            loginUserResponse = await accountClient.LoginUserAsync(this.loginUserRequest);
+            loginUserResponse = await authenticationClient.LoginAsync(this.loginUserRequest);
         }
         catch (SwaggerException<LoginResponse> e)
         {
             this.snackbarService.Add(
-                $"Login attempt failed. Reason: {e.Result.ErrorMessage}.",
+                $"Login attempt failed. Reason: {e.Result.Details}.",
                 Severity.Error);
 
             return;
@@ -83,19 +83,18 @@
             return;
         }
 
-        if (loginUserResponse.IsSuccessful)
+        if (loginUserResponse.Type == LoginResponseType.Successful)
         {
             await localStorage.SetItemAsync(
                 AuthenticationConstants.LocalStorageAuthTokenKey,
-                loginUserResponse.Token);
-
-            ((CustomAuthenticationStateProvider)authenticationStateProvider).NotifyUserAuthentication(
-                this.loginUserRequest.Email);
+                loginUserResponse.AccessToken);
 
             httpClient.DefaultRequestHeaders.Authorization =
                 new AuthenticationHeaderValue(
                     AuthenticationConstants.AuthorizationHeaderScheme,
-                    loginUserResponse.Token);
+                    loginUserResponse.AccessToken);
+
+            ((CustomAuthenticationStateProvider)authenticationStateProvider).NotifyUserAuthenticated();
 
             this.snackbarService.Add(
                 "Successfully logged in user.",
@@ -107,8 +106,8 @@
         else
         {
             this.snackbarService.Add(
-                $"Failed to login user. Reason: {loginUserResponse.ErrorMessage}.",
+                $"Failed to login user. Reason: {loginUserResponse.Details}.",
                 Severity.Warning);
         }
     }
-}*@
+}

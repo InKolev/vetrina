@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Vetrina.Server.Persistence;
 
 namespace Vetrina.Server.Migrations
 {
     [DbContext(typeof(VetrinaDbContext))]
-    partial class VetrinaDbContextModelSnapshot : ModelSnapshot
+    [Migration("20211211161354_Removed_Username_From_User_Model")]
+    partial class Removed_Username_From_User_Model
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
