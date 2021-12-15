@@ -10,8 +10,8 @@ using Vetrina.Server.Persistence;
 namespace Vetrina.Server.Migrations
 {
     [DbContext(typeof(VetrinaDbContext))]
-    [Migration("20211204222941_Initial_Create_Vetrina_Database")]
-    partial class Initial_Create_Vetrina_Database
+    [Migration("20211214003812_Initial_Migration_Create_Vetrina_Models")]
+    partial class Initial_Migration_Create_Vetrina_Models
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -64,9 +64,6 @@ namespace Vetrina.Server.Migrations
                     b.Property<DateTime?>("Updated")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("UserName")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("VerificationToken")
                         .HasColumnType("nvarchar(max)");
 
@@ -100,7 +97,10 @@ namespace Vetrina.Server.Migrations
                     b.Property<string>("OfficialPrice")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Price")
+                    b.Property<double>("Price")
+                        .HasColumnType("float");
+
+                    b.Property<string>("PriceRaw")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("PromotionEndingAt")

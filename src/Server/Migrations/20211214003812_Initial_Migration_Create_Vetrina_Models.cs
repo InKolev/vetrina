@@ -3,10 +3,32 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Vetrina.Server.Migrations
 {
-    public partial class InitialDatabaseCreation : Migration
+    public partial class Initial_Migration_Create_Vetrina_Models : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "Promotions",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    PromotionStartingFrom = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    PromotionEndingAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Price = table.Column<double>(type: "float", nullable: false),
+                    PriceRaw = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    OfficialPrice = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    DiscountPercentage = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    DescriptionRaw = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    DescriptionSearch = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ImageUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Store = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Promotions", x => x.Id);
+                });
+
             migrationBuilder.CreateTable(
                 name: "Users",
                 columns: table => new
@@ -16,7 +38,6 @@ namespace Vetrina.Server.Migrations
                     Title = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     FirstName = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     LastName = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    UserName = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Email = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     AcceptTerms = table.Column<bool>(type: "bit", nullable: false),
@@ -68,6 +89,9 @@ namespace Vetrina.Server.Migrations
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "Promotions");
+
             migrationBuilder.DropTable(
                 name: "RefreshToken");
 

@@ -95,7 +95,10 @@ namespace Vetrina.Server.Migrations
                     b.Property<string>("OfficialPrice")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Price")
+                    b.Property<double>("Price")
+                        .HasColumnType("float");
+
+                    b.Property<string>("PriceRaw")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("PromotionEndingAt")

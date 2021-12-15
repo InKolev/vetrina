@@ -41,9 +41,13 @@ namespace Vetrina.Server.Extensions
                     .GetField(nameof(Promotion.ImageUrl))
                     .GetStringValue(),
 
+                PriceRaw = luceneDocument
+                    .GetField(nameof(Promotion.PriceRaw))
+                    .GetStringValue(),
+
                 Price = luceneDocument
                     .GetField(nameof(Promotion.Price))
-                    .GetStringValue(),
+                    .GetDoubleValueOrDefault(),
 
                 PromotionStartingFrom = new DateTime(
                     luceneDocument
@@ -87,8 +91,13 @@ namespace Vetrina.Server.Extensions
                     Field.Store.YES),
 
                 new StringField(
+                    nameof(Promotion.PriceRaw),
+                    promotion.PriceRaw ?? string.Empty,
+                    Field.Store.YES),
+
+                new DoubleField(
                     nameof(Promotion.Price),
-                    promotion.Price ?? string.Empty,
+                    promotion.Price,
                     Field.Store.YES),
 
                 new StringField(

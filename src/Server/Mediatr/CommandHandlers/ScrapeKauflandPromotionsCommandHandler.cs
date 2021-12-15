@@ -163,11 +163,17 @@ namespace Vetrina.Server.Mediatr.CommandHandlers
                                 promotionalElement.FindElementExists(
                                     By.CssSelector("figure > img"))?.GetAttribute("currentSrc");
 
+                            var isPriceParseable =
+                                double.TryParse(
+                                    promotionalPrice.Trim().Replace(',', '.'),
+                                    out var price);
+
                             var promotionalItem = new Promotion
                             {
                                 DescriptionRaw = description,
                                 DiscountPercentage = discount,
-                                Price = promotionalPrice,
+                                PriceRaw = promotionalPrice,
+                                Price = isPriceParseable ? price : 0,
                                 OfficialPrice = officialPrice,
                                 ImageUrl = imageUrl,
                                 PromotionStartingFrom = promotionPeriod.From,
@@ -198,7 +204,7 @@ namespace Vetrina.Server.Mediatr.CommandHandlers
                     PromotionWeek = request.PromotionWeek,
                     PromotionalItems = promotionalItems
                         .Pipe(async x => x.DescriptionSearch = await transliterationService.LatinToCyrillicAsync(x.DescriptionRaw.ToLowerInvariant(), LanguageHint.Bulgarian))
-                        .DistinctBy(x => $"{x.DescriptionRaw}-{x.Price}")
+                        .DistinctBy(x => $"{x.DescriptionRaw}-{x.PriceRaw}")
                         .ToList(),
                     EventDate = DateTime.UtcNow,
                     EventId = Guid.NewGuid(),
