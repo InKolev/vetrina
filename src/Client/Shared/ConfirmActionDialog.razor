@@ -1,0 +1,16 @@
+﻿<MudDialog>
+    <DialogContent>
+        Сигурни ли сте, че искате да извършите операцията?
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Primary" OnClick="Submit">Да</MudButton>
+        <MudButton OnClick="Cancel">Не</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    void Submit() => MudDialog.Close(DialogResult.Ok(true));
+    void Cancel() => MudDialog.Cancel();
+}

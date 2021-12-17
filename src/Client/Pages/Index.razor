@@ -11,7 +11,7 @@
 @inject ILocalStorageService localStorageService;
 @inject ApplicationState applicationState;
 
-<MudContainer Class="mt-16">
+<MudContainer Class="mt-12">
     <MudText Typo="Typo.h4" Align="Align.Center" GutterBottom="true">
         Промоции
     </MudText>
@@ -72,49 +72,50 @@
 
 @if (this.SearchPromotionsResponse != null && this.SearchPromotionsResponse.Documents.Any())
 {
-    <MudContainer Class="mt-16">
-        @if (this.LoadingSearchResults)
-        {
-            <MudProgressCircular Color="Color.Primary" Size="Size.Large" Indeterminate="true" />
-        }
-        else
-        {
-            <MudGrid>
-                @foreach (var promotion in this.SearchPromotionsResponse.Documents)
-                {
-                    <MudItem md="4" lg="4" xl="4">
-                        <MudCard>
-                            <MudCardHeader>
-                                <CardHeaderAvatar>
-                                    <MudAvatar Size="Size.Large"
-                                               Square="@(promotion.Document.Store == Store.Kaufland ? true : false)"
-                                               Image="@($"/resources/{promotion.Document.Store}.svg")">
-                                    </MudAvatar>
-                                </CardHeaderAvatar>
-                                <CardHeaderContent>
-                                    <MudText Typo="Typo.body1">@promotion.Document.DescriptionRaw</MudText>
-                                </CardHeaderContent>
-                            </MudCardHeader>
-                            <MudCardMedia Image="@promotion.Document.ImageUrl" Height="200" />
-                            <MudCardContent>
-                                <MudButton OnClick="() => applicationState.AddPromotionalItemToShoppingList(promotion.Document)"
-                                           StartIcon="@Icons.Material.Outlined.Add"
-                                           FullWidth="true"
-                                           Color="applicationState.MainThemeColor"
-                                           Variant="Variant.Filled">
-                                    @($"{promotion.Document.Price} BGN")
-                                </MudButton>
-                            </MudCardContent>
-                        </MudCard>
-                    </MudItem>
-                }
-            </MudGrid>
-        }
-    </MudContainer>
+    @if (this.LoadingSearchResults)
+    {
+        <MudProgressCircular Color="Color.Primary" Size="Size.Large" Indeterminate="true" />
+    }
+    else
+    {
+        <MudGrid>
+            @foreach (var promotion in this.SearchPromotionsResponse.Documents)
+            {
+                <MudItem sm="6" md="4" lg="4" xl="3" xxl="2">
+                    <MudCard Class="mx-4">
+                        <MudCardHeader>
+                            <CardHeaderAvatar>
+                                <MudAvatar Size="Size.Large"
+                                           Square="@(promotion.Document.Store == Store.Kaufland ? true : false)"
+                                           Image="@($"/resources/{promotion.Document.Store}.svg")">
+                                </MudAvatar>
+                            </CardHeaderAvatar>
+                            <CardHeaderContent>
+                                <MudText Typo="Typo.body1">@promotion.Document.DescriptionRaw</MudText>
+                            </CardHeaderContent>
+                        </MudCardHeader>
+                        <MudCardMedia Image="@promotion.Document.ImageUrl" Height="200" />
+                        <MudCardContent>
+                            <MudButton OnClick="() => applicationState.AddPromotionalItemToShoppingList(promotion.Document)"
+                                       StartIcon="@Icons.Material.Outlined.Add"
+                                       FullWidth="true"
+                                       Color="Color.Transparent"
+                                       Variant="Variant.Outlined">
+                                @($"{promotion.Document.Price} BGN")
+                            </MudButton>
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
+            }
+        </MudGrid>
+    }
 }
 
 @code
 {
+    public Random PseudoRandomGenerator = new Random();
+    public List<string> DefaultSearchTerms = new List<string> { "file", "shokolad", "plod", "bira", "vino", "meso", "mlqko", "sirene" };
+
     public SearchPromotionsRequest SearchPromotionsRequest { get; set; } = new SearchPromotionsRequest();
 
     public LuceneSearchResponse<Promotion> SearchPromotionsResponse { get; set; }
@@ -167,9 +168,11 @@
         this.LoadingSearchResults = false;
     }
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         this.applicationState.ThemeColorChanged += StateHasChanged;
+
+        await this.SearchAsync(DefaultSearchTerms[PseudoRandomGenerator.Next(0, DefaultSearchTerms.Count)]);
     }
 
     public void Dispose()

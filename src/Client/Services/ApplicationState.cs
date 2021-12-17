@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using MudBlazor;
 using Vetrina.Shared;
 
@@ -16,7 +17,7 @@ namespace Vetrina.Client.Services
 
         public Color MainThemeColor { get; private set; } = Color.Primary;
 
-        public IEnumerable<(Promotion item, int count)> ShoppingList => shoppingList.Values;
+        public List<(Promotion item, int count)> ShoppingList => shoppingList.Values.ToList();
 
         public void AddPromotionalItemToShoppingList(Promotion promotion)
         {

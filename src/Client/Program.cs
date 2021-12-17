@@ -26,6 +26,7 @@ namespace Vetrina.Client
                 });
 
             builder.Services.AddMudServices();
+            builder.Services.AddMudBlazorDialog();
             builder.Services.AddBlazoredLocalStorage();
             builder.Services.AddSingleton<ApplicationState>();
             builder.Services.AddScoped<IClipboardService, ClipboardService>();
