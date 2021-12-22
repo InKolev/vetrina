@@ -7,9 +7,10 @@
 @using Vetrina.Shared.SearchModels
 
 @inject HttpClient httpClient;
+@inject ApplicationState applicationState;
 @inject ISnackbar snackbarService;
 @inject ILocalStorageService localStorageService;
-@inject ApplicationState applicationState;
+@inject IDialogService dialogService;
 
 <MudContainer Class="mt-12">
     <MudText Typo="Typo.h4" Align="Align.Center" GutterBottom="true">
@@ -22,6 +23,7 @@
                 <MudItem sm="1" md="1"></MudItem>
                 <MudItem xs="12" sm="10" md="10">
                     <MudTextField DebounceInterval="400"
+                                  OnAdornmentClick="() => SearchAsync(SearchPromotionsRequest.SearchTerm)"
                                   OnDebounceIntervalElapsed="SearchAsync"
                                   @bind-Value="SearchPromotionsRequest.SearchTerm"
                                   Immediate="true"
@@ -85,24 +87,44 @@
                     <MudCard Class="mx-4">
                         <MudCardHeader>
                             <CardHeaderAvatar>
-                                <MudAvatar Size="Size.Large"
+                                <MudAvatar Elevation="2" Size="Size.Large"
                                            Square="@(promotion.Document.Store == Store.Kaufland ? true : false)"
                                            Image="@($"/resources/{promotion.Document.Store}.svg")">
                                 </MudAvatar>
                             </CardHeaderAvatar>
                             <CardHeaderContent>
-                                <MudText Typo="Typo.body1">@promotion.Document.DescriptionRaw</MudText>
+                                <MudText Typo="Typo.body1" Align="Align.Left">
+                                    <strong>@promotion.Document.DescriptionRaw</strong>
+                                </MudText>
                             </CardHeaderContent>
                         </MudCardHeader>
-                        <MudCardMedia Image="@promotion.Document.ImageUrl" Height="200" />
+                        <MudCardMedia Image="@promotion.Document.ImageUrl" Height="180" />
                         <MudCardContent>
-                            <MudButton OnClick="() => applicationState.AddPromotionalItemToShoppingList(promotion.Document)"
-                                       StartIcon="@Icons.Material.Outlined.Add"
-                                       FullWidth="true"
-                                       Color="Color.Transparent"
-                                       Variant="Variant.Outlined">
-                                @($"{promotion.Document.Price} BGN")
-                            </MudButton>
+                            @if (this.applicationState.ShoppingList.Any(x => x.Promotion.Id == promotion.Document.Id))
+                            {
+                                <MudButton OnClick="() => TryRemoveFromShoppingList(promotion.Document)"
+                                           StartIcon="@Icons.Material.Outlined.Remove"
+                                           FullWidth="true"
+                                           Size="Size.Large"
+                                           Color="Color.Warning"
+                                           Variant="Variant.Text"
+                                           Style="box-shadow: 0px 0px 10px rgba(245, 148, 39, 0.8);">
+                                    <strong>@($"{promotion.Document.Price} BGN")</strong>
+                                </MudButton>
+                            }
+                            else
+                            {
+                                <MudButton OnClick="() => applicationState.AddPromotionalItemToShoppingList(promotion.Document)"
+                                           StartIcon="@Icons.Material.Outlined.Add"
+                                           FullWidth="true"
+                                           Size="Size.Large"
+                                           Color="Color.Transparent"
+                                           Variant="Variant.Text"
+                                           Style="box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);">
+                                    <strong>@($"{promotion.Document.Price} BGN")</strong>
+
+                                </MudButton>
+                            }
                         </MudCardContent>
                     </MudCard>
                 </MudItem>
@@ -113,8 +135,9 @@
 
 @code
 {
+    public MudTheme Theme = new MudTheme();
     public Random PseudoRandomGenerator = new Random();
-    public List<string> DefaultSearchTerms = new List<string> { "file", "shokolad", "plod", "bira", "vino", "meso", "mlqko", "sirene" };
+    public List<string> DefaultSearchTerms = new List<string> { "file", "shoko", "plod", "bira", "vino", "meso", "pile", "sirene" };
 
     public SearchPromotionsRequest SearchPromotionsRequest { get; set; } = new SearchPromotionsRequest();
 
@@ -127,6 +150,14 @@
     public double EndToEndLatencySecs { get; set; }
     public double NetworkLatencySecs { get; set; }
     public double ServerProcessingTimeSecs { get; set; }
+
+    public async Task TriggerSearchOnEnterKeyPressed(KeyboardEventArgs e, string searchTerm)
+    {
+        if (e.Code == "Enter" || e.Code == "NumpadEnter")
+        {
+            await SearchAsync(searchTerm);
+        }
+    }
 
     public async Task SearchAsync(string searchTerm)
     {
@@ -178,5 +209,16 @@
     public void Dispose()
     {
         this.applicationState.ThemeColorChanged -= StateHasChanged;
+    }
+
+    private async Task TryRemoveFromShoppingList(Promotion promotion)
+    {
+        var dialogReference = this.dialogService.Show<ConfirmActionDialog>("Искате ли да премахнете продукта от кошницата?");
+        var dialogResult = await dialogReference.Result;
+
+        if (!dialogResult.Cancelled)
+        {
+            applicationState.RemoveFromShoppingList(promotion);
+        }
     }
 }

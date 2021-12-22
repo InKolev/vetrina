@@ -10,7 +10,7 @@
 
 <MudGrid>
     <MudItem xs="12" sm="12" md="12" lg="12" xl="12" xxl="12">
-        <MudTable RowsPerPage="25" Items="@Elements" MultiSelection="true" @bind-SelectedItems="selectedItems" Hover="true" SortLabel="Сортирай по" AllowUnsorted="false" Elevation="0">
+        <MudTable Virtualize="true" RowsPerPage="25" Items="@this.applicationState.ShoppingList" MultiSelection="true" @bind-SelectedItems="SelectedItems" Hover="true" SortLabel="Сортирай по" AllowUnsorted="false" Elevation="0">
             <NoRecordsContent>
                 <MudText Typo="Typo.h5" Align="Align.Center">
                     Кошницата е празна
@@ -26,8 +26,12 @@
             <RowTemplate>
                 <MudTd DataLabel="Продукт">@context.Promotion.DescriptionRaw</MudTd>
                 <MudTd DataLabel="Цена">@context.Promotion.Price</MudTd>
-                <MudTd DataLabel="Количество">@context.Count</MudTd>
-                <MudTd DataLabel="Обща сума">@(context.Count * context.Promotion.Price)</MudTd>
+                <MudTd DataLabel="Количество">
+                    <MudIconButton Icon="@Icons.Material.Filled.Add" OnClick="() => this.applicationState.IncreaseQuantityInShoppingList(context.Promotion)" />
+                    @context.Quantity
+                    <MudIconButton Icon="@Icons.Material.Filled.Remove" OnClick="() => this.applicationState.DecreaseQuantityInShoppingList(context.Promotion)" />
+                </MudTd>
+                <MudTd DataLabel="Обща сума">@(context.Quantity * context.Promotion.Price)</MudTd>
                 <MudTd DataLabel="Магазин">@context.Promotion.Store.ToString()</MudTd>
             </RowTemplate>
             <PagerContent>
@@ -40,14 +44,14 @@
             <MudItem xs="12" sm="12" md="6" lg="4" xl="4" xxl="4">
                 <MudPaper Elevation="2" Class="mx-4">
                     <MudButton Class="pa-4" Variant="Variant.Text" FullWidth="true" Color="Color.Transparent" Size="Size.Medium" OnClick="CopySelectedShoppingItemsToClipboard">
-                        Копирай избраните продукти
+                        Копирай избраните
                     </MudButton>
                 </MudPaper>
             </MudItem>
             <MudItem xs="12" sm="12" md="6" lg="4" xl="4" xxl="4">
                 <MudPaper Elevation="2" Class="mx-4">
                     <MudButton Class="pa-4" Variant="Variant.Text" FullWidth="true" Color="Color.Surface" Size="Size.Medium" OnClick="CopyEntireShoppingListToClipboard">
-                        Копирай всички продукти
+                        Копирай всички
                     </MudButton>
                 </MudPaper>
             </MudItem>
@@ -63,27 +67,13 @@
 </MudGrid>
 
 @code {
-    public class ShoppingListItem
-    {
-        public Promotion Promotion { get; set; }
 
-        public int Count { get; set; }
-    }
-
-    private HashSet<ShoppingListItem> selectedItems = new HashSet<ShoppingListItem>();
-
-    public List<ShoppingListItem> Elements;
+    public HashSet<ShoppingListItem> SelectedItems = new HashSet<ShoppingListItem>();
 
     protected override Task OnInitializedAsync()
     {
+        this.applicationState.ShoppingListChanged += StateHasChanged;
         this.applicationState.ThemeColorChanged += StateHasChanged;
-
-        this.Elements = applicationState.ShoppingList.Select(x =>
-            new ShoppingListItem
-            {
-                Count = x.count,
-                Promotion = x.item
-            }).ToList();
 
         return Task.CompletedTask;
     }
@@ -95,14 +85,14 @@
 
         if (!dialogResult.Cancelled)
         {
+            //this.SelectedItems.Clear();
             this.applicationState.ClearShoppingList();
-            this.Elements.Clear();
         }
     }
 
     public void CopySelectedShoppingItemsToClipboard()
     {
-        var itemsByStore = this.selectedItems.GroupBy(x => x.Promotion.Store);
+        var itemsByStore = this.SelectedItems.GroupBy(x => x.Promotion.Store);
 
         var basketBuilder = new StringBuilder();
 
@@ -117,9 +107,9 @@
             foreach (var item in storeGroup)
             {
                 var singleItemPrice = item.Promotion.Price;
-                var totalItemPrice = item.Count * item.Promotion.Price;
+                var totalItemPrice = item.Quantity * item.Promotion.Price;
 
-                basketBuilder.AppendLine($"{item.Count} x {item.Promotion.DescriptionRaw.ReplaceNewLinesWithSingleWhitespace()} ({singleItemPrice} BGN) = {totalItemPrice} BGN");
+                basketBuilder.AppendLine($"{item.Quantity} x {item.Promotion.DescriptionRaw.ReplaceNewLinesWithSingleWhitespace()} ({singleItemPrice} BGN) = {totalItemPrice} BGN");
 
                 totalBasketPrice += totalItemPrice;
                 totalStorePrice += totalItemPrice;
@@ -141,7 +131,7 @@
 
     public void CopyEntireShoppingListToClipboard()
     {
-        var itemsByStore = this.applicationState.ShoppingList.GroupBy(x => x.item.Store);
+        var itemsByStore = this.applicationState.ShoppingList.GroupBy(x => x.Promotion.Store);
 
         var basketBuilder = new StringBuilder();
 
@@ -152,12 +142,12 @@
             var storeName = storeGroup.Key.ToString();
             var totalStorePrice = 0d;
             basketBuilder.AppendLine(storeName);
-            foreach (var (promotion, count) in storeGroup)
+            foreach (var item in storeGroup)
             {
-                var singleItemPrice = promotion.PriceRaw;
-                var totalItemPrice = count * promotion.PriceRaw.ToDouble();
+                var singleItemPrice = item.Promotion.PriceRaw;
+                var totalItemPrice = item.Quantity * item.Promotion.PriceRaw.ToDouble();
 
-                basketBuilder.AppendLine($"{count} x {promotion.DescriptionRaw.ReplaceNewLinesWithSingleWhitespace()} ({singleItemPrice} BGN) = {totalItemPrice} BGN");
+                basketBuilder.AppendLine($"{item.Quantity} x {item.Promotion.DescriptionRaw.ReplaceNewLinesWithSingleWhitespace()} ({singleItemPrice} BGN) = {totalItemPrice} BGN");
 
                 totalBasketPrice += totalItemPrice;
                 totalStorePrice += totalItemPrice;
@@ -184,21 +174,17 @@
         shoppingListItem => shoppingListItem.Promotion.Price;
 
     private static Func<ShoppingListItem, object> SortByProductQuantity() =>
-        shoppingListItem => shoppingListItem.Count;
+        shoppingListItem => shoppingListItem.Quantity;
 
     private static Func<ShoppingListItem, object> SortByProductTotalPrice() =>
-        shoppingListItem => shoppingListItem.Count * shoppingListItem.Promotion.Price;
+        shoppingListItem => shoppingListItem.Quantity * shoppingListItem.Promotion.Price;
 
     private static Func<ShoppingListItem, object> SortByStore() =>
         shoppingListItem => shoppingListItem.Promotion.Store;
 
-    protected override void OnInitialized()
-    {
-        this.applicationState.ThemeColorChanged += StateHasChanged;
-    }
-
     public void Dispose()
     {
         this.applicationState.ThemeColorChanged -= StateHasChanged;
+        this.applicationState.ShoppingListChanged -= StateHasChanged;
     }
 }

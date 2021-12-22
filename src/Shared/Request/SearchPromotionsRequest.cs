@@ -17,24 +17,24 @@
         /// Specifies if promotions from Kaufland store should be returned.
         /// If none of the flags is enabled - the API ignores this filter and returns documents from all stores.
         /// </summary>
-        public bool IncludeKaufland { get; set; }
+        public bool IncludeKaufland { get; set; } = true;
 
         /// <summary>
         /// Specifies if promotions from Lidl store should be returned.
         /// If none of the Include* flags is enabled - the API ignores this filter and returns documents from all stores.
         /// </summary>
-        public bool IncludeLidl { get; set; }
+        public bool IncludeLidl { get; set; } = true;
 
         /// <summary>
         /// Specifies if promotions from Billa store should be returned.
         /// If none of the Include* flags is enabled - the API ignores this filter and returns documents from all stores.
         /// </summary>
-        public bool IncludeBilla { get; set; }
+        public bool IncludeBilla { get; set; } = false;
 
         /// <summary>
         /// Specifies if promotions from Fantastiko store should be returned.
         /// If none of the Include* flags is enabled - the API ignores this filter and returns documents from all stores.
         /// </summary>
-        public bool IncludeFantastiko { get; set; }
+        public bool IncludeFantastiko { get; set; } = false;
     }
 }

@@ -13,10 +13,8 @@
         <MudSpacer />
         <MudIconButton Icon="@Icons.Material.Filled.Brightness6" Color="Color.Inherit" Edge="Edge.End" OnClick="applicationState.SwitchColor" />
         <MudSpacer />
-        <MudBadge Content="applicationState.ShoppingList.Sum(x => x.count)" Color="Color.Error" Overlap="true" Origin="Origin.TopCenter">
-            <MudBadge Content="applicationState.ShoppingList.Count" Color="Color.Warning" Overlap="true" Origin="Origin.TopRight">
-                <MudIconButton Link="/shopping-list" Target="_self" Icon="@Icons.Material.Filled.FoodBank" Color="Color.Inherit" Edge="Edge.End" />
-            </MudBadge>
+        <MudBadge Content="applicationState.ShoppingList.Count" Color="Color.Secondary" Overlap="true" Origin="Origin.TopRight">
+            <MudIconButton Link="/shopping-list" Target="_self" Icon="@Icons.Material.Filled.FoodBank" Color="Color.Inherit" Edge="Edge.End" />
         </MudBadge>
     </MudAppBar>
     <MudDrawer @bind-Open="DrawerOpen" ClipMode="DrawerClipMode.Never" Elevation="2">

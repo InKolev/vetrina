@@ -75,22 +75,21 @@ namespace Vetrina.Server.Mediatr.CommandHandlers
                 {
                     // TODO: Add timeout policy for each category scraping process.
                     // We don't want one slow/large/faulty page to block the entire application.
-                    var temporaryWebDriver = webDriverFactory.CreateWebDriver();
 
                     try
                     {
-                        temporaryWebDriver.Navigate().GoToUrl(category);
+                        webDriver.Navigate().GoToUrl(category);
 
-                        TryCloseCookiePoliciesPopup(temporaryWebDriver);
+                        TryCloseCookiePoliciesPopup(webDriver);
 
-                        await ScrollToBottomOfPage(temporaryWebDriver);
+                        await ScrollToBottomOfPage(webDriver);
 
                         var promotionPeriod = new PromotionPeriod();
 
                         try
                         {
                             var promotionPeriodElement =
-                                new WebDriverWait(temporaryWebDriver, TimeSpan.FromSeconds(10))
+                                new WebDriverWait(webDriver, TimeSpan.FromSeconds(10))
                                     .Until(ExpectedConditions
                                         .ElementExists(
                                             By.CssSelector("div.a-icon-tile-headline__subheadline > div")));
@@ -136,7 +135,7 @@ namespace Vetrina.Server.Mediatr.CommandHandlers
                         }
 
                         var promotionalElements =
-                            temporaryWebDriver.FindElements(
+                            webDriver.FindElements(
                                 By.CssSelector("div.o-overview-list__list-item"));
 
                         foreach (var promotionalElement in promotionalElements)
@@ -173,7 +172,7 @@ namespace Vetrina.Server.Mediatr.CommandHandlers
                                 DescriptionRaw = description,
                                 DiscountPercentage = discount,
                                 PriceRaw = promotionalPrice,
-                                Price = isPriceParseable ? price : 0,
+                                Price = isPriceParseable ? Math.Round(price, 2, MidpointRounding.ToZero) : 0,
                                 OfficialPrice = officialPrice,
                                 ImageUrl = imageUrl,
                                 PromotionStartingFrom = promotionPeriod.From,
@@ -191,10 +190,6 @@ namespace Vetrina.Server.Mediatr.CommandHandlers
                     {
                         // TODO: Add to list of failures.
                         // Different categories/pages might fail to be scraped for different reasons.
-                    }
-                    finally
-                    {
-                        temporaryWebDriver.Dispose();
                     }
                 }
 

@@ -160,7 +160,7 @@ namespace Vetrina.Server.Mediatr.CommandHandlers
                             {
                                 DescriptionRaw = $"{description} ({additionalInformation})",
                                 PriceRaw = promotionalPrice,
-                                Price = isPriceParseable ? price : 0,
+                                Price = isPriceParseable ? Math.Round(price, 2, MidpointRounding.ToZero) : 0,
                                 OfficialPrice = officialPrice,
                                 ImageUrl = imageUrl,
                                 PromotionStartingFrom = promotionPeriod.From,
