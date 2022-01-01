@@ -70,7 +70,7 @@ namespace Vetrina.Server.Middlewares
             catch 
             {
                 // Do nothing if JWT validation fails
-                // User is not attached to the context so request won't have access to secured routes
+                // User is not attached to the context so query won't have access to secured routes
             }
         }
     }

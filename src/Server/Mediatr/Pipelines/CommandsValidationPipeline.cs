@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.Logging;
-using Vetrina.Server.Mediatr.Shared;
+using Vetrina.Shared;
 
 namespace Vetrina.Server.Mediatr.Pipelines
 {

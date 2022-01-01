@@ -1,7 +1,6 @@
 ﻿@page "/shopping-list"
 @using System.Text
 @using Vetrina.Client.Services
-@using Vetrina.Shared
 
 @inject ApplicationState applicationState;
 @inject IClipboardService clipboardService;
@@ -10,7 +9,7 @@
 
 <MudGrid>
     <MudItem xs="12" sm="12" md="12" lg="12" xl="12" xxl="12">
-        <MudTable Virtualize="true" RowsPerPage="25" Items="@this.applicationState.ShoppingList" MultiSelection="true" @bind-SelectedItems="SelectedItems" Hover="true" SortLabel="Сортирай по" AllowUnsorted="false" Elevation="0">
+        <MudTable Virtualize="true" SelectedItems="SelectedItems" RowsPerPage="25" Items="@this.applicationState.ShoppingList" MultiSelection="true" Hover="true" SortLabel="Сортирай по" AllowUnsorted="false" Elevation="0">
             <NoRecordsContent>
                 <MudText Typo="Typo.h5" Align="Align.Center">
                     Кошницата е празна
@@ -31,7 +30,7 @@
                     @context.Quantity
                     <MudIconButton Icon="@Icons.Material.Filled.Remove" OnClick="() => this.applicationState.DecreaseQuantityInShoppingList(context.Promotion)" />
                 </MudTd>
-                <MudTd DataLabel="Обща сума">@(context.Quantity * context.Promotion.Price)</MudTd>
+                <MudTd DataLabel="Обща сума">@(Math.Round(context.Quantity * context.Promotion.Price, 2, MidpointRounding.ToEven))</MudTd>
                 <MudTd DataLabel="Магазин">@context.Promotion.Store.ToString()</MudTd>
             </RowTemplate>
             <PagerContent>
@@ -39,31 +38,34 @@
             </PagerContent>
         </MudTable>
     </MudItem>
-    <MudItem xs="12" sm="12" md="12" lg="12" xl="12" xxl="12">
-        <MudGrid>
-            <MudItem xs="12" sm="12" md="6" lg="4" xl="4" xxl="4">
-                <MudPaper Elevation="2" Class="mx-4">
-                    <MudButton Class="pa-4" Variant="Variant.Text" FullWidth="true" Color="Color.Transparent" Size="Size.Medium" OnClick="CopySelectedShoppingItemsToClipboard">
-                        Копирай избраните
-                    </MudButton>
-                </MudPaper>
-            </MudItem>
-            <MudItem xs="12" sm="12" md="6" lg="4" xl="4" xxl="4">
-                <MudPaper Elevation="2" Class="mx-4">
-                    <MudButton Class="pa-4" Variant="Variant.Text" FullWidth="true" Color="Color.Surface" Size="Size.Medium" OnClick="CopyEntireShoppingListToClipboard">
-                        Копирай всички
-                    </MudButton>
-                </MudPaper>
-            </MudItem>
-            <MudItem xs="12" sm="12" md="6" lg="4" xl="4" xxl="4">
-                <MudPaper Elevation="2" Class="mx-4">
-                    <MudButton Class="pa-4" Variant="Variant.Text" FullWidth="true" Color="Color.Warning" StartIcon="@Icons.Material.Filled.ClearAll" Size="Size.Medium" OnClick="ClearShoppingList">
-                        Изчисти кошницата
-                    </MudButton>
-                </MudPaper>
-            </MudItem>
-        </MudGrid>
-    </MudItem>
+    @if (this.applicationState.ShoppingList.Any())
+    {
+        <MudItem xs="12" sm="12" md="12" lg="12" xl="12" xxl="12">
+            <MudGrid>
+                <MudItem xs="12" sm="12" md="6" lg="4" xl="4" xxl="4">
+                    <MudPaper Elevation="2" Class="mx-4">
+                        <MudButton Class="pa-4" Variant="Variant.Text" FullWidth="true" Color="Color.Transparent" Size="Size.Medium" OnClick="CopySelectedShoppingItemsToClipboard">
+                            Копирай избраните
+                        </MudButton>
+                    </MudPaper>
+                </MudItem>
+                <MudItem xs="12" sm="12" md="6" lg="4" xl="4" xxl="4">
+                    <MudPaper Elevation="2" Class="mx-4">
+                        <MudButton Class="pa-4" Variant="Variant.Text" FullWidth="true" Color="Color.Surface" Size="Size.Medium" OnClick="CopyEntireShoppingListToClipboard">
+                            Копирай всички
+                        </MudButton>
+                    </MudPaper>
+                </MudItem>
+                <MudItem xs="12" sm="12" md="6" lg="4" xl="4" xxl="4">
+                    <MudPaper Elevation="2" Class="mx-4">
+                        <MudButton Class="pa-4" Variant="Variant.Text" FullWidth="true" Color="Color.Warning" StartIcon="@Icons.Material.Filled.ClearAll" Size="Size.Medium" OnClick="ClearShoppingList">
+                            Изчисти кошницата
+                        </MudButton>
+                    </MudPaper>
+                </MudItem>
+            </MudGrid>
+        </MudItem>
+    }
 </MudGrid>
 
 @code {
@@ -85,7 +87,6 @@
 
         if (!dialogResult.Cancelled)
         {
-            //this.SelectedItems.Clear();
             this.applicationState.ClearShoppingList();
         }
     }
@@ -107,7 +108,7 @@
             foreach (var item in storeGroup)
             {
                 var singleItemPrice = item.Promotion.Price;
-                var totalItemPrice = item.Quantity * item.Promotion.Price;
+                var totalItemPrice = Math.Round(item.Quantity * item.Promotion.Price, 2, MidpointRounding.ToEven);
 
                 basketBuilder.AppendLine($"{item.Quantity} x {item.Promotion.DescriptionRaw.ReplaceNewLinesWithSingleWhitespace()} ({singleItemPrice} BGN) = {totalItemPrice} BGN");
 
@@ -115,11 +116,11 @@
                 totalStorePrice += totalItemPrice;
             }
 
-            basketBuilder.AppendLine($"Обща сума за магазин {storeName} - {Math.Round(totalStorePrice, MidpointRounding.ToEven)} BGN");
+            basketBuilder.AppendLine($"Обща сума за магазин {storeName} - {Math.Round(totalStorePrice, 2, MidpointRounding.ToEven)} BGN");
             basketBuilder.AppendLine(Environment.NewLine);
         }
 
-        basketBuilder.AppendLine($"Обща сума за цялата кошница - {Math.Round(totalBasketPrice, MidpointRounding.ToEven)} BGN");
+        basketBuilder.AppendLine($"Обща сума за цялата кошница - {Math.Round(totalBasketPrice, 2, MidpointRounding.ToEven)} BGN");
 
         this.clipboardService.WriteTextAsync(basketBuilder.ToString());
 
@@ -153,11 +154,11 @@
                 totalStorePrice += totalItemPrice;
             }
 
-            basketBuilder.AppendLine($"Обща сума за магазин {storeName} - {Math.Round(totalStorePrice, MidpointRounding.ToEven)} BGN");
+            basketBuilder.AppendLine($"Обща сума за магазин {storeName} - {Math.Round(totalStorePrice, 2, MidpointRounding.ToEven)} BGN");
             basketBuilder.AppendLine(Environment.NewLine);
         }
 
-        basketBuilder.AppendLine($"Обща сума за цялата кошница - {Math.Round(totalBasketPrice, MidpointRounding.ToEven)} BGN");
+        basketBuilder.AppendLine($"Обща сума за цялата кошница - {Math.Round(totalBasketPrice, 2, MidpointRounding.ToEven)} BGN");
 
         this.clipboardService.WriteTextAsync(basketBuilder.ToString());
 

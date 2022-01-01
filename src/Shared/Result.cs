@@ -2,22 +2,22 @@
 using System.Linq;
 using FluentValidation.Results;
 
-namespace Vetrina.Server.Mediatr.Shared
+namespace Vetrina.Shared
 {
-    public class CommandResult
+    public abstract class Result
     {
-        public CommandResult(bool isSuccess)
+        protected Result(bool isSuccess)
         {
             IsSuccess = isSuccess;
         }
 
-        public CommandResult(bool isSuccess, string message)
+        protected Result(bool isSuccess, string message)
         {
             IsSuccess = isSuccess;
             Message = message;
         }
 
-        public CommandResult(IEnumerable<ValidationFailure> validationMessages)
+        protected Result(IEnumerable<ValidationFailure> validationMessages)
         {
             IsSuccess = false;
             ValidationMessages = validationMessages;

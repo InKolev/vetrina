@@ -1,6 +1,5 @@
 ﻿using System;
 using MediatR;
-using Vetrina.Server.Mediatr.Shared;
 using Vetrina.Shared;
 
 namespace Vetrina.Server.Mediatr.Commands

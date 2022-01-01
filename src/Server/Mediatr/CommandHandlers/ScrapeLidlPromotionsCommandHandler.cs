@@ -15,7 +15,6 @@ using Vetrina.Server.Abstractions;
 using Vetrina.Server.Extensions;
 using Vetrina.Server.Mediatr.Commands;
 using Vetrina.Server.Mediatr.Events;
-using Vetrina.Server.Mediatr.Shared;
 using Vetrina.Shared;
 using ExpectedConditions = SeleniumExtras.WaitHelpers.ExpectedConditions;
 
@@ -185,7 +184,7 @@ namespace Vetrina.Server.Mediatr.CommandHandlers
                 {
                     Store = Store.Lidl,
                     PromotionWeek = request.PromotionWeek,
-                    PromotionalItems = promotionalItems
+                    Promotions = promotionalItems
                         .Pipe(async x => x.DescriptionSearch = await transliterationService.LatinToCyrillicAsync(x.DescriptionRaw.ToLowerInvariant(), LanguageHint.Bulgarian))
                         .DistinctBy(x => $"{x.DescriptionRaw}-{x.PriceRaw}")
                         .ToList(),

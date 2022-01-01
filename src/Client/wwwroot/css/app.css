@@ -9,6 +9,10 @@ html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
+*, *:before, *:after {
+    box-sizing: border-box;
+}
+
 a, .btn-link {
     color: #0366d6;
 }
@@ -53,3 +57,122 @@ a, .btn-link {
         right: 0.75rem;
         top: 0.5rem;
     }
+
+.page-wrapper {
+    min-height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+    .page-wrapper button {
+        padding: 20px;
+        border: none;
+        background: #d5d8e7;
+        position: relative;
+        outline: none;
+        border-radius: 5px;
+        color: #292d48;
+        font-size: 18px;
+    }
+
+        .page-wrapper button .cart-item {
+            position: absolute;
+            height: 24px;
+            width: 24px;
+            top: -10px;
+            right: -10px;
+        }
+
+            .page-wrapper button .cart-item:before {
+                content: '1';
+                display: block;
+                line-height: 24px;
+                height: 24px;
+                width: 24px;
+                font-size: 12px;
+                font-weight: 600;
+                background: #2bd156;
+                color: white;
+                border-radius: 20px;
+                text-align: center;
+            }
+
+        .page-wrapper button.sendtocart .cart-item {
+            display: block;
+            animation: xAxis 1s forwards cubic-bezier(1, 0.44, 0.84, 0.165);
+        }
+
+            .page-wrapper button.sendtocart .cart-item:before {
+                animation: yAxis 1s alternate forwards cubic-bezier(0.165, 0.84, 0.44, 1);
+            }
+/*
+.cart {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    background: #292d48;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 5px;
+}*/
+/*
+    .cart i {
+        font-size: 25px;
+        color: white;
+    }
+*/
+   /* .cart:before {
+        content: attr(data-totalitems);
+        font-size: 12px;
+        font-weight: 600;
+        position: absolute;
+        top: -12px;
+        right: -12px;
+        background: #2bd156;
+        line-height: 24px;
+        padding: 0 5px;
+        height: 24px;
+        min-width: 24px;
+        color: white;
+        text-align: center;
+        border-radius: 24px;
+    }*/
+
+    .cartshake {
+        animation: shakeCart 0.4s ease-in-out forwards;
+    }
+
+@keyframes xAxis {
+    100% {
+        transform: translateX(calc(50vw - 105px));
+    }
+}
+
+@keyframes yAxis {
+    100% {
+        transform: translateY(calc(-50vh + 75px));
+    }
+}
+
+@keyframes shakeCart {
+    25% {
+        transform: translateX(6px);
+    }
+
+    50% {
+        transform: translateX(-4px);
+    }
+
+    75% {
+        transform: translateX(2px);
+    }
+
+    100% {
+        transform: translateX(0);
+    }
+}
+ 

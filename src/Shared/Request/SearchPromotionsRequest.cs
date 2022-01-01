@@ -11,7 +11,7 @@
         /// Max number of documents returned by the API.
         /// Default value is 24.
         /// </summary>
-        public int MaxNumberOfDocs { get; set; } = 48;
+        public int MaxNumberOfDocs { get; set; } = 24;
 
         /// <summary>
         /// Specifies if promotions from Kaufland store should be returned.

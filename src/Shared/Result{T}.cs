@@ -1,28 +1,28 @@
 ﻿using System.Collections.Generic;
 using FluentValidation.Results;
 
-namespace Vetrina.Server.Mediatr.Shared
+namespace Vetrina.Shared
 {
-    public class CommandResult<T> : CommandResult
+    public class Result<T> : Result
     {
-        public CommandResult(bool isSuccess)
+        protected Result(bool isSuccess)
             : base(isSuccess)
         {
 
         }
 
-        public CommandResult(bool isSuccess, string message)
+        protected Result(bool isSuccess, string message)
             : base(isSuccess, message)
         {
         }
 
-        public CommandResult(bool isSuccess, string message, T data)
+        protected Result(bool isSuccess, string message, T data)
             : base(isSuccess, message)
         {
             Data = data;
         }
 
-        public CommandResult(IEnumerable<ValidationFailure> validationMessages)
+        protected Result(IEnumerable<ValidationFailure> validationMessages)
             : base(validationMessages)
         {
         }

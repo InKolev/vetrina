@@ -1,4 +1,4 @@
-﻿using Vetrina.Shared;
+﻿using Vetrina.Autogen.API.Client.Contracts;
 
 namespace Vetrina.Client.Services
 {

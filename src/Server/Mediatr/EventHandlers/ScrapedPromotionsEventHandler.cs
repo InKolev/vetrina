@@ -33,8 +33,22 @@ namespace Vetrina.Server.Mediatr.EventHandlers
             ScrapedPromotionsEvent notification,
             CancellationToken cancellationToken)
         {
-            logger.LogInformation($"Received {notification.PromotionalItems.Count} promotional items from {notification.Store} for {notification.PromotionWeek}");
+            logger.LogInformation($"Received {notification.Promotions.Count} promotional items from {notification.Store} for {notification.PromotionWeek}");
 
+            // Archive instead of delete.
+            var deletedRows = await vetrinaDbContext.Database
+                .ExecuteSqlInterpolatedAsync(
+                    sql: $"DELETE FROM Promotions WHERE Store = {(int)notification.Store}",
+                    cancellationToken: cancellationToken);
+
+            logger.LogInformation($"Deleted all ({deletedRows}) documents from the Database where Store is {notification.Store}.");
+
+            await vetrinaDbContext.AddRangeAsync(notification.Promotions, cancellationToken);
+
+            var addedRows = await vetrinaDbContext.SaveChangesAsync(cancellationToken);
+            
+            logger.LogInformation($"Persisted {addedRows} new items to the Database for Store {notification.Store}.");
+            
             await luceneIndex.DeleteAllDocumentsWhere(
                 new BooleanQuery
                 {
@@ -44,22 +58,10 @@ namespace Vetrina.Server.Mediatr.EventHandlers
             logger.LogInformation($"Deleted all documents from Lucene index where Store is {notification.Store}.");
 
             await luceneIndex.IndexDocumentsAsync(
-                notification.PromotionalItems.Select(promotionalItem => 
+                notification.Promotions.Select(promotionalItem => 
                     promotionalItem.MapToLuceneDocument()));
 
-            logger.LogInformation($"Indexed {notification.PromotionalItems.Count} new documents in Lucene for Store {notification.Store}.");
-
-            var deletedRows = await vetrinaDbContext.Database
-                .ExecuteSqlInterpolatedAsync(
-                    sql: $"DELETE FROM Promotions WHERE Store = {(int)notification.Store}",
-                    cancellationToken: cancellationToken);
-
-            logger.LogInformation($"Deleted all ({deletedRows}) documents from the Database where Store is {notification.Store}.");
-
-            await vetrinaDbContext.AddRangeAsync(notification.PromotionalItems, cancellationToken);
-            var addedRows = await vetrinaDbContext.SaveChangesAsync(cancellationToken);
-
-            logger.LogInformation($"Persisted {addedRows} items to the Database for Store {notification.Store}.");
+            logger.LogInformation($"Indexed {notification.Promotions.Count} new documents in Lucene for Store {notification.Store}.");
         }
 
         private static Query CreateStoreQuery(Store store)

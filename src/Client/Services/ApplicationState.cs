@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using MudBlazor;
-using Vetrina.Shared;
+using Vetrina.Autogen.API.Client.Contracts;
 
 namespace Vetrina.Client.Services
 {
@@ -12,17 +13,29 @@ namespace Vetrina.Client.Services
 
         public event Action ShoppingListChanged;
 
+        public string ShakeCartClass { get; set; }
+
+        public string TossToCartClass { get; set; }
+
         public Color MainThemeColor { get; private set; } = Color.Primary;
 
         public ICollection<ShoppingListItem> ShoppingList { get; set; } = new List<ShoppingListItem>();
 
-        public void AddPromotionalItemToShoppingList(Promotion promotion)
+        public async Task AddPromotionalItemToShoppingList(Promotion promotion)
         {
             var listItem = this.ShoppingList.SingleOrDefault(x => x.Promotion.Id == promotion.Id);
             if (listItem == default)
             {
                 this.ShoppingList.Add(new ShoppingListItem { Promotion = promotion, Quantity = 1 });
             }
+
+            this.ShakeCartClass = "cartshake";
+
+            this.NotifyShoppingListStateChanged();
+
+            await Task.Delay(TimeSpan.FromMilliseconds(600));
+
+            this.ShakeCartClass = string.Empty;
 
             this.NotifyShoppingListStateChanged();
         }

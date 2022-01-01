@@ -11,7 +11,7 @@ namespace Vetrina.Server.Mediatr.Events
 
         public PromotionWeek PromotionWeek { get; set; }
 
-        public List<Promotion> PromotionalItems { get; set; }
+        public List<Promotion> Promotions { get; set; }
 
         public DateTime EventDate { get; set; }
 

@@ -32,7 +32,7 @@ namespace Vetrina.Client
             builder.Services.AddScoped<IClipboardService, ClipboardService>();
             builder.Services.AddScoped<IAuthenticationClient, AuthenticationClient>();
             builder.Services.AddScoped<IUsersClient, UsersClient>();
-            builder.Services.AddScoped<ISearchPromotionsClient, SearchPromotionsClient>();
+            builder.Services.AddScoped<IPromotionsClient, PromotionsClient>();
 
             // Register Auth services.
             builder.Services.AddOptions();

@@ -1,16 +1,15 @@
-﻿@page "/"
+﻿@page "/promotions/search"
+
 @using Blazored.LocalStorage
 @using System.Diagnostics
+@using Vetrina.Autogen.API.Client.Contracts
 @using Vetrina.Client.Services
-@using Vetrina.Shared
-@using Vetrina.Shared.Request
-@using Vetrina.Shared.SearchModels
 
-@inject HttpClient httpClient;
 @inject ApplicationState applicationState;
 @inject ISnackbar snackbarService;
 @inject ILocalStorageService localStorageService;
 @inject IDialogService dialogService;
+@inject IPromotionsClient promotionsClient;
 
 <MudContainer Class="mt-12">
     <MudText Typo="Typo.h4" Align="Align.Center" GutterBottom="true">
@@ -114,15 +113,16 @@
                             }
                             else
                             {
-                                <MudButton OnClick="() => applicationState.AddPromotionalItemToShoppingList(promotion.Document)"
+                                <MudButton OnClick="() => AddToCart(promotion.Document)"
                                            StartIcon="@Icons.Material.Outlined.Add"
                                            FullWidth="true"
                                            Size="Size.Large"
                                            Color="Color.Transparent"
                                            Variant="Variant.Text"
-                                           Style="box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);">
+                                           Style="box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);"
+                                           Class="@applicationState.TossToCartClass">
                                     <strong>@($"{promotion.Document.Price} BGN")</strong>
-
+                                    <span class="cart-item"></span>
                                 </MudButton>
                             }
                         </MudCardContent>
@@ -135,13 +135,30 @@
 
 @code
 {
-    public MudTheme Theme = new MudTheme();
     public Random PseudoRandomGenerator = new Random();
-    public List<string> DefaultSearchTerms = new List<string> { "file", "shoko", "plod", "bira", "vino", "meso", "pile", "sirene" };
 
-    public SearchPromotionsRequest SearchPromotionsRequest { get; set; } = new SearchPromotionsRequest();
+    public List<string> DefaultSearchTerms =
+        new()
+        {
+                "file",
+                "shokolad",
+                "plod",
+                "bira",
+                "vino",
+                "meso",
+                "pile",
+                "sirene",
+                "svinsko",
+                "riba"
+            };
 
-    public LuceneSearchResponse<Promotion> SearchPromotionsResponse { get; set; }
+    public SearchPromotionsRequest SearchPromotionsRequest { get; set; } =
+        new SearchPromotionsRequest
+        {
+            MaxNumberOfDocs = 24
+        };
+
+    public LuceneSearchResponseOfPromotion SearchPromotionsResponse { get; set; }
 
     public bool LoadingSearchResults { get; set; } = false;
 
@@ -171,29 +188,23 @@
 
         this.Stopwatch.Restart();
 
-        var httpResponse = await this.httpClient.PostAsJsonAsync("/api/SearchPromotions", SearchPromotionsRequest);
-
-        this.Stopwatch.Stop();
-
-        if (httpResponse.IsSuccessStatusCode)
+        try
         {
-            this.snackbarService.Clear();
-            this.snackbarService.Configuration.PositionClass = Defaults.Classes.Position.BottomCenter;
-            this.snackbarService.Configuration.SnackbarVariant = Variant.Outlined;
-            this.snackbarService.Add("Searching for goodies...", Severity.Success);
-            this.SearchPromotionsResponse = await httpResponse.Content.ReadFromJsonAsync<LuceneSearchResponse<Promotion>>();
+            this.SearchPromotionsResponse = await this.promotionsClient.SearchPromotionsAsync(SearchPromotionsRequest);
+
+            this.Stopwatch.Stop();
 
             this.EndToEndLatencySecs = Math.Round(this.Stopwatch.Elapsed.TotalMilliseconds / 1000, 2, MidpointRounding.AwayFromZero);
             this.ServerProcessingTimeSecs = Math.Round(this.SearchPromotionsResponse.ProcessingTimeMs / 1000, 2, MidpointRounding.AwayFromZero);
             this.NetworkLatencySecs = Math.Round(this.EndToEndLatencySecs - this.ServerProcessingTimeSecs, 2, MidpointRounding.AwayFromZero);
         }
-        else
+        catch (Exception e)
         {
             this.snackbarService.Clear();
             this.snackbarService.Configuration.PositionClass = Defaults.Classes.Position.BottomCenter;
             this.snackbarService.Configuration.SnackbarVariant = Variant.Outlined;
             this.snackbarService.Add("Failed while searching for promotions...", Severity.Error);
-            this.snackbarService.Add($"Reason: {httpResponse.ReasonPhrase}", Severity.Error);
+            this.snackbarService.Add($"Reason: {e.Message}", Severity.Error);
         }
 
         this.LoadingSearchResults = false;
@@ -220,5 +231,10 @@
         {
             applicationState.RemoveFromShoppingList(promotion);
         }
+    }
+
+    private async Task AddToCart(Promotion promotion)
+    {
+        await applicationState.AddPromotionalItemToShoppingList(promotion);
     }
 }
