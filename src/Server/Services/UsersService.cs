@@ -8,8 +8,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Vetrina.Server.Abstractions;
 using Vetrina.Server.Domain;
+using Vetrina.Server.Models;
 using Vetrina.Server.Persistence;
-using Vetrina.Shared.Models;
 using BC = BCrypt.Net.BCrypt;
 
 namespace Vetrina.Server.Services

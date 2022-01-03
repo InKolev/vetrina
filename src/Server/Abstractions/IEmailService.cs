@@ -1,6 +1,6 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using Vetrina.Shared.Models;
+using Vetrina.Server.Models;
 
 namespace Vetrina.Server.Abstractions
 {

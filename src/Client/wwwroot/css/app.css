@@ -106,41 +106,17 @@ a, .btn-link {
             .page-wrapper button.sendtocart .cart-item:before {
                 animation: yAxis 1s alternate forwards cubic-bezier(0.165, 0.84, 0.44, 1);
             }
-/*
-.cart {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    width: 50px;
-    height: 50px;
-    background: #292d48;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 5px;
-}*/
-/*
-    .cart i {
-        font-size: 25px;
-        color: white;
-    }
-*/
-   /* .cart:before {
-        content: attr(data-totalitems);
-        font-size: 12px;
-        font-weight: 600;
-        position: absolute;
-        top: -12px;
-        right: -12px;
-        background: #2bd156;
-        line-height: 24px;
-        padding: 0 5px;
-        height: 24px;
-        min-width: 24px;
-        color: white;
-        text-align: center;
-        border-radius: 24px;
-    }*/
+.promotion-card-small {
+    object-fit: cover;
+    width: 90%;
+    height: 160px;
+}
+
+.promotion-card-large {
+    object-fit: cover;
+    width: 100%;
+    height: 500px;
+}
 
     .cartshake {
         animation: shakeCart 0.4s ease-in-out forwards;
@@ -175,4 +151,4 @@ a, .btn-link {
         transform: translateX(0);
     }
 }
- 
+

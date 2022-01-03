@@ -8,9 +8,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Vetrina.Server.Abstractions;
 using Vetrina.Server.Controllers.Abstract;
+using Vetrina.Server.Models;
 using Vetrina.Server.Persistence;
 using Vetrina.Shared;
-using Vetrina.Shared.Request;
 using Vetrina.Shared.SearchModels;
 
 namespace Vetrina.Server.Controllers
@@ -34,7 +34,7 @@ namespace Vetrina.Server.Controllers
         }
 
         [HttpPost("search")]
-        public async Task<ActionResult<LuceneSearchResponse<Promotion>>> SearchPromotions(
+        public async Task<ActionResult<LuceneSearchResponse<Promotion>>> SearchPromotionsAsync(
             SearchPromotionsRequest searchPromotionsRequest)
         {
             var stopwatch = Stopwatch.StartNew();
@@ -92,7 +92,7 @@ namespace Vetrina.Server.Controllers
         }
 
         [HttpPost("browse")]
-        public async Task<ActionResult<BrowsePromotionsResponse>> BrowsePromotions(
+        public async Task<ActionResult<BrowsePromotionsResponse>> BrowsePromotionsAsync(
             BrowsePromotionsRequest browsePromotionsRequest)
         {
             //var skip = (browsePromotionsRequest.Page - 1) * browsePromotionsRequest.PageSize;
@@ -101,7 +101,7 @@ namespace Vetrina.Server.Controllers
             var skip = browsePromotionsRequest.Skip;
             var take = browsePromotionsRequest.Take;
 
-            var promotions = 
+            var promotions =
                 await this.vetrinaDbContext.Promotions
                     .OrderBy(x => x.Id)
                     .Skip(skip)
@@ -113,6 +113,19 @@ namespace Vetrina.Server.Controllers
                 Promotions = promotions,
                 TotalPromotionsCount = await this.vetrinaDbContext.Promotions.CountAsync()
             };
+        }
+
+        [HttpGet("get/{promotionId}")]
+        public async Task<ActionResult<GetPromotionResponse>> GetPromotionAsync(int promotionId)
+        {
+            var promotion = await this.vetrinaDbContext.FindAsync<Promotion>(promotionId);
+
+            if (promotion == null)
+            {
+                return new GetPromotionResponse(GetPromotionResponseType.NotFound);
+            }
+
+            return new GetPromotionResponse(GetPromotionResponseType.Successful, promotion);
         }
 
         private static Filter CreateStoreTermFilter(Store store)

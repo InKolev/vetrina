@@ -17,10 +17,10 @@ using Microsoft.IdentityModel.Tokens;
 using Vetrina.Server.Abstractions;
 using Vetrina.Server.Constants;
 using Vetrina.Server.Domain;
+using Vetrina.Server.Models;
 using Vetrina.Server.Options;
 using Vetrina.Server.Persistence;
 using Vetrina.Shared;
-using Vetrina.Shared.Models;
 using BC = BCrypt.Net.BCrypt;
 
 namespace Vetrina.Server.Services

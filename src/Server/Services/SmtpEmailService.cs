@@ -9,8 +9,8 @@ using Microsoft.Extensions.Options;
 using MimeKit;
 using MimeKit.Text;
 using Vetrina.Server.Abstractions;
+using Vetrina.Server.Models;
 using Vetrina.Server.Options;
-using Vetrina.Shared.Models;
 
 namespace Vetrina.Server.Services
 {

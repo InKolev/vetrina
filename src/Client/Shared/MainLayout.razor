@@ -30,6 +30,9 @@
     <MudMainContent>
         @Body
     </MudMainContent>
+    <MudScrollToTop TopOffset="200" ScrollBehavior="ScrollBehavior.Smooth">
+        <MudFab Size="Size.Large" Color="this.applicationState.MainThemeColor" Icon="@Icons.Filled.ArrowCircleUp" />
+    </MudScrollToTop>
 </MudLayout>
 
 @code {

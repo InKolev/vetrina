@@ -94,6 +94,13 @@ namespace Vetrina.Autogen.API.Client.Contracts
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
         System.Threading.Tasks.Task<BrowsePromotionsResponse> BrowsePromotionsAsync(BrowsePromotionsRequest browsePromotionsRequest, System.Threading.CancellationToken cancellationToken);
     
+        /// <exception cref="SwaggerException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<GetPromotionResponse> GetPromotionAsync(int promotionId);
+    
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <exception cref="SwaggerException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<GetPromotionResponse> GetPromotionAsync(int promotionId, System.Threading.CancellationToken cancellationToken);
+    
     }
     
     [System.CodeDom.Compiler.GeneratedCode("NSwag", "13.14.8.0 (NJsonSchema v10.5.2.0 (Newtonsoft.Json v12.0.0.0))")]
@@ -811,6 +818,43 @@ namespace Vetrina.Autogen.API.Client.Contracts
         {
             return Newtonsoft.Json.JsonConvert.DeserializeObject<BrowsePromotionsRequest>(data, new Newtonsoft.Json.JsonSerializerSettings());
         }
+    
+    }
+    
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.5.2.0 (Newtonsoft.Json v12.0.0.0)")]
+    public partial class GetPromotionResponse 
+    {
+        [Newtonsoft.Json.JsonProperty("details", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string Details { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("type", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public GetPromotionResponseType Type { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("promotion", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public Promotion Promotion { get; set; }
+    
+        public string ToJson()
+        {
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this, new Newtonsoft.Json.JsonSerializerSettings());
+        }
+    
+        public static GetPromotionResponse FromJson(string data)
+        {
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<GetPromotionResponse>(data, new Newtonsoft.Json.JsonSerializerSettings());
+        }
+    
+    }
+    
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.5.2.0 (Newtonsoft.Json v12.0.0.0)")]
+    public enum GetPromotionResponseType
+    {
+        Successful = 1,
+    
+        UnexpectedError = 2,
+    
+        ValidationError = 3,
+    
+        NotFound = 4,
     
     }
     

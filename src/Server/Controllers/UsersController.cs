@@ -6,8 +6,8 @@ using Microsoft.Extensions.Logging;
 using Vetrina.Server.Abstractions;
 using Vetrina.Server.Attributes;
 using Vetrina.Server.Controllers.Abstract;
+using Vetrina.Server.Models;
 using Vetrina.Shared;
-using Vetrina.Shared.Models;
 
 namespace Vetrina.Server.Controllers
 {

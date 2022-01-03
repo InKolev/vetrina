@@ -1,6 +1,6 @@
 using AutoMapper;
 using Vetrina.Server.Domain;
-using Vetrina.Shared.Models;
+using Vetrina.Server.Models;
 
 namespace Vetrina.Server.Services
 {

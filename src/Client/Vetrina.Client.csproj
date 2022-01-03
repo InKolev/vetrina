@@ -13,7 +13,6 @@
     <None Include="Pages\SearchPromotions.razor" />
     <None Include="Shared\MainLayout.razor" />
     <None Include="Shared\NavMenu.razor" />
-    <None Include="Shared\SurveyPrompt.razor" />
     <None Include="wwwroot\favicon.ico" />
     <None Include="wwwroot\index.html" />
     <None Include="wwwroot\resources\Kaufland.svg" />
