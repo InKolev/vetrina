@@ -2,11 +2,71 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Blazored.LocalStorage;
 using MudBlazor;
 using Vetrina.Autogen.API.Client.Contracts;
 
 namespace Vetrina.Client.Services
 {
+    public interface IShoppingListRepository
+    {
+        Task AddItemToShoppingList(Promotion promotion);
+
+        Task RemoveItemFromShoppingList(Promotion promotion);
+
+        Task IncreaseQuantityInShoppingList(Promotion promotion);
+
+        Task DecreaseQuantityInShoppingList(Promotion promotion);
+
+        Task ClearShoppingList();
+    }
+
+    public class LocalStorageShoppingListRepository : IShoppingListRepository
+    {
+        private const string ShoppingListKey = "ShoppingList";
+
+        private readonly ILocalStorageService localStorageService;
+
+        public LocalStorageShoppingListRepository(ILocalStorageService localStorageService)
+        {
+            this.localStorageService = localStorageService;
+        }
+
+        public async Task AddItemToShoppingList(Promotion promotion)
+        {
+            if (!await this.localStorageService.ContainKeyAsync(ShoppingListKey))
+            {
+                await this.localStorageService.SetItemAsync(ShoppingListKey, new List<ShoppingListItem>());
+            }
+
+            var shoppingList = await this.localStorageService.GetItemAsync<List<ShoppingListItem>>(ShoppingListKey);
+            var shoppingListItem = new ShoppingListItem { Promotion = promotion, Quantity = 1 };
+            shoppingList.Add(shoppingListItem);
+
+            await this.localStorageService.SetItemAsync(ShoppingListKey, shoppingList);
+        }
+
+        public async Task RemoveItemFromShoppingList(Promotion promotion)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task IncreaseQuantityInShoppingList(Promotion promotion)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task DecreaseQuantityInShoppingList(Promotion promotion)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task ClearShoppingList()
+        {
+            throw new NotImplementedException();
+        }
+    }
+
     public class ApplicationState
     {
         public event Action ThemeColorChanged;
@@ -44,7 +104,7 @@ namespace Vetrina.Client.Services
         {
             var listItem = this.ShoppingList.SingleOrDefault(x => x.Promotion.Id == promotion.Id);
 
-            if (listItem != default && listItem.Quantity < 999)
+            if (listItem is { Quantity: < 999 })
             {
                 listItem.Quantity++;
 
@@ -56,7 +116,7 @@ namespace Vetrina.Client.Services
         {
             var listItem = this.ShoppingList.SingleOrDefault(x => x.Promotion.Id == promotion.Id);
 
-            if (listItem != default && listItem.Quantity > 1)
+            if (listItem is { Quantity: > 1 })
             {
                 listItem.Quantity--;
 

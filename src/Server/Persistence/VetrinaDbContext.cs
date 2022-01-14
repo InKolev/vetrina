@@ -14,6 +14,8 @@ namespace Vetrina.Server.Persistence
 
         public DbSet<Promotion> Promotions { get; set; }
 
+        public DbSet<SearchRecord> SearchRecords { get; set; }
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);

@@ -71,74 +71,70 @@
         </MudItem>
         <MudItem md="2" lg="2" xl="2"></MudItem>
     </MudGrid>
-
-
-    @if (this.SearchPromotionsResponse != null && this.SearchPromotionsResponse.Documents.Any())
-    {
-        @if (this.LoadingSearchResults)
-        {
-            <MudProgressCircular Color="Color.Primary" Size="Size.Large" Indeterminate="true" />
-        }
-        else
-        {
-            <MudGrid>
-                @foreach (var promotion in this.SearchPromotionsResponse.Documents)
-                {
-                    <MudItem sm="6" md="4" lg="4" xl="4" xxl="3">
-                        <MudCard Class="mx-4">
-                            <MudCardHeader>
-                                <CardHeaderAvatar>
-                                    <MudAvatar Elevation="2" Size="Size.Large"
-                                               Square="@(promotion.Document.Store == Store.Kaufland ? true : false)"
-                                               Image="@($"/resources/{promotion.Document.Store}.svg")">
-                                    </MudAvatar>
-                                </CardHeaderAvatar>
-                                <CardHeaderContent>
-                                    <MudText Typo="Typo.body1" Align="Align.Left">
-                                        <strong>@promotion.Document.DescriptionRaw</strong>
-                                    </MudText>
-                                </CardHeaderContent>
-                            </MudCardHeader>
-                            <MudLink Href="@($"/promotions/view/{promotion.Document.Id}")">
-                                <MudCardMedia Image="@promotion.Document.ImageUrl" Class="promotion-card-small" />
-                            </MudLink>
-                            <MudCardContent>
-                                @if (this.applicationState.ShoppingList.Any(x => x.Promotion.Id == promotion.Document.Id))
-                                {
-                                    <MudButton OnClick="() => TryRemoveFromShoppingList(promotion.Document)"
-                                               StartIcon="@Icons.Material.Outlined.Remove"
-                                               FullWidth="true"
-                                               Size="Size.Large"
-                                               Color="Color.Warning"
-                                               Variant="Variant.Text"
-                                               Style="box-shadow: 0px 0px 10px rgba(245, 148, 39, 0.8);">
-                                        <strong>@($"{promotion.Document.Price} BGN")</strong>
-                                    </MudButton>
-                                }
-                                else
-                                {
-                                    <MudButton OnClick="() => AddToCart(promotion.Document)"
-                                               StartIcon="@Icons.Material.Outlined.Add"
-                                               FullWidth="true"
-                                               Size="Size.Large"
-                                               Color="Color.Transparent"
-                                               Variant="Variant.Text"
-                                               Style="box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);"
-                                               Class="@applicationState.TossToCartClass">
-                                        <strong>@($"{promotion.Document.Price} BGN")</strong>
-                                        <span class="cart-item"></span>
-                                    </MudButton>
-                                }
-                            </MudCardContent>
-                        </MudCard>
-                    </MudItem>
-                }
-            </MudGrid>
-        }
-    }
 </MudContainer>
 
-
+@if (this.SearchPromotionsResponse != null && this.SearchPromotionsResponse.Documents.Any())
+{
+    @if (this.LoadingSearchResults)
+    {
+        <MudProgressCircular Color="Color.Primary" Size="Size.Large" Indeterminate="true" />
+    }
+    else
+    {
+        <MudGrid>
+            @foreach (var promotion in this.SearchPromotionsResponse.Documents)
+            {
+                <MudItem xs="12" sm="6" md="4" lg="4" xl="3" xxl="2">
+                    <MudCard Class="mx-4">
+                        <MudCardHeader>
+                            <CardHeaderAvatar>
+                                <MudAvatar Elevation="2" Size="Size.Large"
+                                           Square="@(promotion.Document.Store == Store.Kaufland ? true : false)"
+                                           Image="@($"/resources/{promotion.Document.Store}.svg")">
+                                </MudAvatar>
+                            </CardHeaderAvatar>
+                            <CardHeaderContent>
+                                <MudText Typo="Typo.body1" Align="Align.Left">
+                                    <strong title="@promotion.Document.DescriptionRaw" class="cut-text">@promotion.Document.DescriptionRaw</strong>
+                                </MudText>
+                            </CardHeaderContent>
+                        </MudCardHeader>
+                        <MudCardMedia Image="@promotion.Document.ImageUrl" Class="promotion-card-small" />
+                        <MudCardContent>
+                            @*<img src="@promotion.Document.ImageUrl" class="promotion-card-small" >*@
+                            @if (this.applicationState.ShoppingList.Any(x => x.Promotion.Id == promotion.Document.Id))
+                            {
+                                <MudButton OnClick="() => TryRemoveFromShoppingList(promotion.Document)"
+                                           StartIcon="@Icons.Material.Outlined.Remove"
+                                           FullWidth="true"
+                                           Size="Size.Large"
+                                           Color="Color.Warning"
+                                           Variant="Variant.Text"
+                                           Style="box-shadow: 0px 0px 10px rgba(245, 148, 39, 0.8);">
+                                    <strong>@($"{promotion.Document.Price} BGN")</strong>
+                                </MudButton>
+                            }
+                            else
+                            {
+                                <MudButton OnClick="() => AddToCart(promotion.Document)"
+                                           StartIcon="@Icons.Material.Outlined.Add"
+                                           FullWidth="true"
+                                           Size="Size.Large"
+                                           Color="Color.Transparent"
+                                           Variant="Variant.Text"
+                                           Style="box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);"
+                                           Class="@applicationState.TossToCartClass">
+                                    <strong>@($"{promotion.Document.Price} BGN")</strong>
+                                    <span class="cart-item"></span>
+                                </MudButton>
+                            }
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
+            }
+        </MudGrid>
+    }
+}
 @code
 {
     public Random PseudoRandomGenerator = new Random();

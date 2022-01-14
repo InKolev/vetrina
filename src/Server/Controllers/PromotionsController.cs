@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Vetrina.Server.Abstractions;
 using Vetrina.Server.Controllers.Abstract;
+using Vetrina.Server.Domain;
 using Vetrina.Server.Models;
 using Vetrina.Server.Persistence;
 using Vetrina.Shared;
@@ -44,12 +45,20 @@ namespace Vetrina.Server.Controllers
                 return BadRequest("SearchTerm cannot be null or whitespace.");
             }
 
+            // If the search term is already in cyrillic, no transformations will be applied.
+            // The transliteration service will leave the string untouched.
             var searchTermInCyrillic =
                 await transliterationService.LatinToCyrillicAsync(
                     searchPromotionsRequest.SearchTerm.ToLowerInvariant(),
                     LanguageHint.Bulgarian);
 
-            // Search by prefix query. 
+#pragma warning disable CS4014
+            // These calls are intentionally not awaited.
+            // We don't care about losing a couple of records when tracking user activity.
+            this.vetrinaDbContext.SearchRecords.AddAsync(new SearchRecord(searchTermInCyrillic, GetCallerIpAddress()));
+            this.vetrinaDbContext.SaveChangesAsync();
+#pragma warning restore CS4014
+
             // TODO: Experiment with n-gram or fuzzy-match queries and analyze performance/accuracy.
             var luceneQuery =
                 new PrefixQuery(
@@ -95,9 +104,6 @@ namespace Vetrina.Server.Controllers
         public async Task<ActionResult<BrowsePromotionsResponse>> BrowsePromotionsAsync(
             BrowsePromotionsRequest browsePromotionsRequest)
         {
-            //var skip = (browsePromotionsRequest.Page - 1) * browsePromotionsRequest.PageSize;
-            //var take = browsePromotionsRequest.PageSize;
-
             var skip = browsePromotionsRequest.Skip;
             var take = browsePromotionsRequest.Take;
 

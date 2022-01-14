@@ -1,4 +1,5 @@
 using System;
+using System.Text.Json.Serialization;
 using FluentValidation.AspNetCore;
 using Hangfire;
 using MediatR;
@@ -47,7 +48,7 @@ namespace Vetrina.Server
 
             services
                 .AddControllers()
-                .AddJsonOptions(x => x.JsonSerializerOptions.IgnoreNullValues = true);
+                .AddJsonOptions(x => x.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull);
 
             services.AddCors();
 

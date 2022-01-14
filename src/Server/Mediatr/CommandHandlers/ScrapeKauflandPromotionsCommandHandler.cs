@@ -7,7 +7,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.Extensions.Logging;
-using MoreLinq;
 using Newtonsoft.Json;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Support.UI;
@@ -179,13 +178,15 @@ namespace Vetrina.Server.Mediatr.CommandHandlers
                                 Store = Store.Kaufland
                             };
 
+                            promotionalItem.DescriptionSearch = await transliterationService.LatinToCyrillicAsync(promotionalItem.DescriptionRaw.ToLowerInvariant(), LanguageHint.Bulgarian);
+
                             promotionalItems.Add(promotionalItem);
 
                             logger.LogInformation(
                                 $"{JsonConvert.SerializeObject(promotionalItem, Formatting.Indented)}");
                         }
                     }
-                    catch (Exception e)
+                    catch (Exception)
                     {
                         // TODO: Add to list of failures.
                         // Different categories/pages might fail to be scraped for different reasons.
@@ -197,7 +198,6 @@ namespace Vetrina.Server.Mediatr.CommandHandlers
                     Store = Store.Kaufland,
                     PromotionWeek = request.PromotionWeek,
                     Promotions = promotionalItems
-                        .Pipe(async x => x.DescriptionSearch = await transliterationService.LatinToCyrillicAsync(x.DescriptionRaw.ToLowerInvariant(), LanguageHint.Bulgarian))
                         .DistinctBy(x => $"{x.DescriptionRaw}-{x.PriceRaw}")
                         .ToList(),
                     EventDate = DateTime.UtcNow,
@@ -235,7 +235,7 @@ namespace Vetrina.Server.Mediatr.CommandHandlers
 
                 confirmCookiePoliciesButton?.Click();
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 // Pass through.
                 logger.LogWarning("Couldn't find a 'Confirm cookie policies' popup. Skip close popup step.");

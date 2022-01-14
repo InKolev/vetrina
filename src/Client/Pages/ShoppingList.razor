@@ -1,5 +1,6 @@
 ﻿@page "/shopping-list"
 @using System.Text
+@using Vetrina.Autogen.API.Client.Contracts
 @using Vetrina.Client.Services
 
 @inject ApplicationState applicationState;
@@ -21,6 +22,7 @@
                 <MudTh><MudTableSortLabel SortBy="SortByProductQuantity()">Количество</MudTableSortLabel></MudTh>
                 <MudTh><MudTableSortLabel SortBy="SortByProductTotalPrice()">Обща сума</MudTableSortLabel></MudTh>
                 <MudTh><MudTableSortLabel SortBy="SortByStore()">Магазин</MudTableSortLabel></MudTh>
+                <MudTh>Премахни</MudTh>
             </HeaderContent>
             <RowTemplate>
                 <MudTd DataLabel="Продукт">@context.Promotion.DescriptionRaw</MudTd>
@@ -32,6 +34,9 @@
                 </MudTd>
                 <MudTd DataLabel="Обща сума">@(Math.Round(context.Quantity * context.Promotion.Price, 2, MidpointRounding.ToEven))</MudTd>
                 <MudTd DataLabel="Магазин">@context.Promotion.Store.ToString()</MudTd>
+                <MudTd DataLabel="Премахни">
+                    <MudIconButton Icon="@Icons.Material.Filled.RemoveCircleOutline" Color="Color.Error" aria-label="Премахни" OnClick="() => TryRemoveFromShoppingList(context.Promotion)" />
+                </MudTd>
             </RowTemplate>
             <PagerContent>
                 <MudTablePager HorizontalAlignment="HorizontalAlignment.Center" RowsPerPageString="Брой продукти на страница" InfoFormat="{first_item} - {last_item} от общо {all_items}" PageSizeOptions="new int[] { 10, 25, 50, 100 }" />
@@ -88,6 +93,17 @@
         if (!dialogResult.Cancelled)
         {
             this.applicationState.ClearShoppingList();
+        }
+    }
+
+    private async Task TryRemoveFromShoppingList(Promotion promotion)
+    {
+        var dialogReference = this.dialogService.Show<ConfirmActionDialog>("Искате ли да премахнете продукта от кошницата?");
+        var dialogResult = await dialogReference.Result;
+
+        if (!dialogResult.Cancelled)
+        {
+            applicationState.RemoveFromShoppingList(promotion);
         }
     }
 

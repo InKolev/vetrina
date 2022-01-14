@@ -29,16 +29,22 @@
     </MudDrawer>
     <MudMainContent>
         @Body
+        <MudScrollToTop TopOffset="100" ScrollBehavior="ScrollBehavior.Smooth">
+            <MudFab Size="Size.Large" Color="this.applicationState.MainThemeColor" Icon="@Icons.Filled.ArrowCircleUp" />
+        </MudScrollToTop>
     </MudMainContent>
-    <MudScrollToTop TopOffset="200" ScrollBehavior="ScrollBehavior.Smooth">
-        <MudFab Size="Size.Large" Color="this.applicationState.MainThemeColor" Icon="@Icons.Filled.ArrowCircleUp" />
-    </MudScrollToTop>
 </MudLayout>
 
 @code {
-    public bool DrawerOpen { get; set; } = true;
+    private bool drawerOpen = false;
 
-    protected override async Task OnInitializedAsync()
+    public bool DrawerOpen
+    {
+        get => this.drawerOpen;
+        set { this.drawerOpen = value; }
+    }
+
+    protected override void OnInitialized()
     {
         this.applicationState.ShoppingListChanged += StateHasChanged;
     }

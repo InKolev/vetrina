@@ -538,7 +538,7 @@ namespace Vetrina.Server.Services
         private static string CreateRandomTokenString()
         {
             var randomBytes = new byte[40];
-            using var rngCryptoServiceProvider = new RNGCryptoServiceProvider();
+            using var rngCryptoServiceProvider = RandomNumberGenerator.Create();
             rngCryptoServiceProvider.GetBytes(randomBytes);
 
             // Convert random bytes to hex string

@@ -65,11 +65,8 @@
 @code {
     public List<Promotion> Promotions { get; set; } = new List<Promotion>();
 
-    public BrowsePromotionsRequest BrowsePromotionsRequest { get; set; } = new BrowsePromotionsRequest
-    {
-        Page = 1,
-        PageSize = 16
-    };
+    public BrowsePromotionsRequest BrowsePromotionsRequest { get; set; } =
+        new BrowsePromotionsRequest { Skip = 0, Take = 16 };
 
     protected override async Task OnInitializedAsync()
     {
@@ -84,10 +81,8 @@
     {
         this.BrowsePromotionsRequest.Take = request.Count;
         this.BrowsePromotionsRequest.Skip = request.StartIndex;
-        var fetchedPromotions = await promotionsClient.BrowsePromotionsAsync(BrowsePromotionsRequest);
-        this.BrowsePromotionsRequest.Page += 1;
 
-        Console.WriteLine(new string('*', 60));
+        var fetchedPromotions = await promotionsClient.BrowsePromotionsAsync(BrowsePromotionsRequest);
 
         return new ItemsProviderResult<Promotion>(fetchedPromotions.Promotions, fetchedPromotions.TotalPromotionsCount);
     }
