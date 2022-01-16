@@ -11,6 +11,7 @@ namespace Vetrina.Server.Mediatr.Pipelines
 {
     public class CommandsValidationPipeline<TRequest, TResponse> 
         : IPipelineBehavior<TRequest, TResponse>
+        where TRequest : IRequest<TResponse>
         where TResponse : CommandResult
     {
         private readonly ILogger<CommandsValidationPipeline<TRequest, TResponse>> logger;

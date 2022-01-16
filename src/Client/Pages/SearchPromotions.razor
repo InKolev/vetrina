@@ -11,6 +11,8 @@
 @inject ILocalStorageService localStorageService;
 @inject IDialogService dialogService;
 @inject IPromotionsClient promotionsClient;
+@inject IShoppingListRepository shoppingListRepository;
+@inject IShoppingListService shoppingListService;
 
 <MudContainer Class="mt-12">
     <MudText Align="Align.Center">
@@ -89,8 +91,8 @@
                         <MudCardHeader>
                             <CardHeaderAvatar>
                                 <MudAvatar Elevation="2" Size="Size.Large"
-                                           Square="@(promotion.Document.Store == Store.Kaufland ? true : false)"
-                                           Image="@($"/resources/{promotion.Document.Store}.svg")">
+                               Square="@(promotion.Document.Store == Store.Kaufland ? true : false)"
+                               Image="@($"/resources/{promotion.Document.Store}.svg")">
                                 </MudAvatar>
                             </CardHeaderAvatar>
                             <CardHeaderContent>
@@ -102,28 +104,28 @@
                         <MudCardMedia Image="@promotion.Document.ImageUrl" Class="promotion-card-small" />
                         <MudCardContent>
                             @*<img src="@promotion.Document.ImageUrl" class="promotion-card-small" >*@
-                            @if (this.applicationState.ShoppingList.Any(x => x.Promotion.Id == promotion.Document.Id))
+                            @if (this.shoppingList.Any(x => x.Promotion.Id == promotion.Document.Id))
                             {
                                 <MudButton OnClick="() => TryRemoveFromShoppingList(promotion.Document)"
-                                           StartIcon="@Icons.Material.Outlined.Remove"
-                                           FullWidth="true"
-                                           Size="Size.Large"
-                                           Color="Color.Warning"
-                                           Variant="Variant.Text"
-                                           Style="box-shadow: 0px 0px 10px rgba(245, 148, 39, 0.8);">
+                           StartIcon="@Icons.Material.Outlined.Remove"
+                           FullWidth="true"
+                           Size="Size.Large"
+                           Color="Color.Warning"
+                           Variant="Variant.Text"
+                           Style="box-shadow: 0px 0px 10px rgba(245, 148, 39, 0.8);">
                                     <strong>@($"{promotion.Document.Price} BGN")</strong>
                                 </MudButton>
                             }
                             else
                             {
                                 <MudButton OnClick="() => AddToCart(promotion.Document)"
-                                           StartIcon="@Icons.Material.Outlined.Add"
-                                           FullWidth="true"
-                                           Size="Size.Large"
-                                           Color="Color.Transparent"
-                                           Variant="Variant.Text"
-                                           Style="box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);"
-                                           Class="@applicationState.TossToCartClass">
+                           StartIcon="@Icons.Material.Outlined.Add"
+                           FullWidth="true"
+                           Size="Size.Large"
+                           Color="Color.Transparent"
+                           Variant="Variant.Text"
+                           Style="box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);"
+                           Class="@applicationState.TossToCartClass">
                                     <strong>@($"{promotion.Document.Price} BGN")</strong>
                                     <span class="cart-item"></span>
                                 </MudButton>
@@ -135,13 +137,16 @@
         </MudGrid>
     }
 }
+
 @code
 {
+    private List<ShoppingListItem> shoppingList = new List<ShoppingListItem>();
+
     public Random PseudoRandomGenerator = new Random();
 
     public List<string> DefaultSearchTerms =
         new()
-        {
+            {
                 "file",
                 "shokolad",
                 "plod",
@@ -156,9 +161,9 @@
 
     public SearchPromotionsRequest SearchPromotionsRequest { get; set; } =
         new SearchPromotionsRequest
-        {
-            MaxNumberOfDocs = 24
-        };
+            {
+                MaxNumberOfDocs = 24
+            };
 
     public LuceneSearchResponseOfPromotion SearchPromotionsResponse { get; set; }
 
@@ -226,14 +231,18 @@
 
     protected override async Task OnInitializedAsync()
     {
-        this.applicationState.ThemeColorChanged += StateHasChanged;
+        this.shoppingList = await this.shoppingListRepository.GetAllItemsAsync();
 
         await this.SearchAsync(DefaultSearchTerms[PseudoRandomGenerator.Next(0, DefaultSearchTerms.Count)]);
+
+        this.applicationState.ThemeColorChanged += StateHasChanged;
+        this.applicationState.ShoppingListChanged += HandleStateHasChanged;
     }
 
     public void Dispose()
     {
         this.applicationState.ThemeColorChanged -= StateHasChanged;
+        this.applicationState.ShoppingListChanged -= HandleStateHasChanged;
     }
 
     private async Task TryRemoveFromShoppingList(Promotion promotion)
@@ -243,12 +252,18 @@
 
         if (!dialogResult.Cancelled)
         {
-            applicationState.RemoveFromShoppingList(promotion);
+            await this.shoppingListService.RemoveFromShoppingList(promotion);
         }
     }
 
     private async Task AddToCart(Promotion promotion)
     {
-        await applicationState.AddPromotionalItemToShoppingList(promotion);
+        await this.shoppingListService.AddPromotionalItemToShoppingList(promotion);
+    }
+
+    public void HandleStateHasChanged(List<ShoppingListItem> shoppingListState)
+    {
+        this.shoppingList = shoppingListState;
+        this.StateHasChanged();
     }
 }

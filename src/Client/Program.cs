@@ -28,11 +28,14 @@ namespace Vetrina.Client
             builder.Services.AddMudServices();
             builder.Services.AddMudBlazorDialog();
             builder.Services.AddBlazoredLocalStorage();
-            builder.Services.AddSingleton<ApplicationState>();
             builder.Services.AddScoped<IClipboardService, ClipboardService>();
             builder.Services.AddScoped<IAuthenticationClient, AuthenticationClient>();
             builder.Services.AddScoped<IUsersClient, UsersClient>();
             builder.Services.AddScoped<IPromotionsClient, PromotionsClient>();
+
+            builder.Services.AddSingleton<ApplicationState>();
+            builder.Services.AddScoped<IShoppingListRepository, LocalStorageShoppingListRepository>();
+            builder.Services.AddScoped<IShoppingListService, ShoppingListService>();
 
             // Register Auth services.
             builder.Services.AddOptions();

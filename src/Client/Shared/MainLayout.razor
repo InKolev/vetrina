@@ -3,6 +3,7 @@
 @inherits LayoutComponentBase
 
 @inject ApplicationState applicationState;
+@inject IShoppingListRepository shoppingListRepository;
 
 <MudThemeProvider />
 <MudSnackbarProvider />
@@ -14,7 +15,7 @@
         <MudIconButton Icon="@Icons.Material.Filled.Brightness6" Color="Color.Inherit" Edge="Edge.End" OnClick="applicationState.SwitchColor" />
         <MudSpacer />
         <div class="@applicationState.ShakeCartClass">
-            <MudBadge Content="applicationState.ShoppingList.Count" Color="Color.Secondary" Overlap="true" Origin="Origin.TopRight">
+            <MudBadge Content="this.shoppingListItemsCount" Color="Color.Secondary" Overlap="true" Origin="Origin.TopRight">
                 <MudIconButton Link="/shopping-list" Target="_self" Icon="@Icons.Material.Filled.FoodBank" Color="Color.Inherit" Edge="Edge.End" />
             </MudBadge>
         </div>
@@ -37,6 +38,7 @@
 
 @code {
     private bool drawerOpen = false;
+    private int shoppingListItemsCount = 0;
 
     public bool DrawerOpen
     {
@@ -44,18 +46,25 @@
         set { this.drawerOpen = value; }
     }
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        this.applicationState.ShoppingListChanged += StateHasChanged;
+        this.shoppingListItemsCount = await shoppingListRepository.GetItemsCountAsync();
+        this.applicationState.ShoppingListChanged += HandleStateHasChanged;
     }
 
     public void Dispose()
     {
-        this.applicationState.ShoppingListChanged -= StateHasChanged;
+        this.applicationState.ShoppingListChanged -= HandleStateHasChanged;
     }
 
     public void ToggleDrawer()
     {
         this.DrawerOpen = !this.DrawerOpen;
+    }
+
+    public void HandleStateHasChanged(List<ShoppingListItem> shoppingListState)
+    {
+        this.shoppingListItemsCount = shoppingListState.Count;
+        this.StateHasChanged();
     }
 }

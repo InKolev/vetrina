@@ -10,6 +10,8 @@
 @inject ILocalStorageService localStorageService;
 @inject IDialogService dialogService;
 @inject IPromotionsClient promotionsClient
+@inject IShoppingListRepository shoppingListRepository;
+@inject IShoppingListService shoppingListService;
 
 <MudGrid>
     <Virtualize Context="promotion" ItemsProvider="@FetchPromotions" OverscanCount="8" ItemSize="400">
@@ -30,28 +32,28 @@
                 </MudCardHeader>
                 <MudCardMedia Image="@promotion.ImageUrl" Height="220" />
                 <MudCardContent>
-                    @if (this.applicationState.ShoppingList.Any(x => x.Promotion.Id == promotion.Id))
+                    @if (this.ShoppingList.Any(x => x.Promotion.Id == promotion.Id))
                     {
                         <MudButton OnClick="() => TryRemoveFromShoppingList(promotion)"
-                                   StartIcon="@Icons.Material.Outlined.Remove"
-                                   FullWidth="true"
-                                   Size="Size.Large"
-                                   Color="Color.Warning"
-                                   Variant="Variant.Text"
-                                   Style="box-shadow: 0px 0px 10px rgba(245, 148, 39, 0.8);">
+                               StartIcon="@Icons.Material.Outlined.Remove"
+                               FullWidth="true"
+                               Size="Size.Large"
+                               Color="Color.Warning"
+                               Variant="Variant.Text"
+                               Style="box-shadow: 0px 0px 10px rgba(245, 148, 39, 0.8);">
                             <strong>@($"{promotion.Price} BGN")</strong>
                         </MudButton>
                     }
                     else
                     {
                         <MudButton OnClick="() => AddToCart(promotion)"
-                                   StartIcon="@Icons.Material.Outlined.Add"
-                                   FullWidth="true"
-                                   Size="Size.Large"
-                                   Color="Color.Transparent"
-                                   Variant="Variant.Text"
-                                   Style="box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);"
-                                   Class="@applicationState.TossToCartClass">
+                               StartIcon="@Icons.Material.Outlined.Add"
+                               FullWidth="true"
+                               Size="Size.Large"
+                               Color="Color.Transparent"
+                               Variant="Variant.Text"
+                               Style="box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);"
+                               Class="@applicationState.TossToCartClass">
                             <strong>@($"{promotion.Price} BGN")</strong>
                             <span class="cart-item"></span>
                         </MudButton>
@@ -64,12 +66,15 @@
 
 @code {
     public List<Promotion> Promotions { get; set; } = new List<Promotion>();
+    
+    public List<ShoppingListItem> ShoppingList = new List<ShoppingListItem>();
 
     public BrowsePromotionsRequest BrowsePromotionsRequest { get; set; } =
         new BrowsePromotionsRequest { Skip = 0, Take = 16 };
 
     protected override async Task OnInitializedAsync()
     {
+        this.ShoppingList = await this.shoppingListRepository.GetAllItemsAsync();
     }
 
     private bool IsStoreLogoRectangular(Store store)
@@ -94,12 +99,12 @@
 
         if (!dialogResult.Cancelled)
         {
-            applicationState.RemoveFromShoppingList(promotion);
+            await this.shoppingListService.RemoveFromShoppingList(promotion);
         }
     }
 
     private async Task AddToCart(Promotion promotion)
     {
-        await applicationState.AddPromotionalItemToShoppingList(promotion);
+        await this.shoppingListService.AddPromotionalItemToShoppingList(promotion);
     }
 }
