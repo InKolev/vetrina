@@ -1,4 +1,6 @@
 using System;
+using System.IO;
+using System.Net.Http;
 using System.Text.Json.Serialization;
 using FluentValidation.AspNetCore;
 using Hangfire;
@@ -12,6 +14,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Serilog;
+using Vetrina.Autogen.API.Client;
+using Vetrina.Autogen.API.Client.Contracts;
 using Vetrina.Server.Abstractions;
 using Vetrina.Server.HostedServices;
 using Vetrina.Server.Jobs;
@@ -26,6 +30,8 @@ namespace Vetrina.Server
 {
     public class Startup
     {
+        private object syncLock = new object();
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -37,6 +43,7 @@ namespace Vetrina.Server
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            AppDomain.CurrentDomain.FirstChanceException += CurrentDomain_FirstChanceException;
             // Add Logging.
             services.AddLogging(loggingBuilder =>
             {
@@ -74,9 +81,9 @@ namespace Vetrina.Server
             services.AddScoped<IScrapeLidlPromotionsJob, ScrapeLidlPromotionsJob>();
 
             // Add Hangfire services.
-            var hangfireDatabaseConnectionString = 
+            var hangfireDatabaseConnectionString =
                 Configuration.GetConnectionString("HangfireDatabase");
-            
+
             services.AddHangfire(configuration => configuration
                 .SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
                 .UseSimpleAssemblyNameTypeSerializer()
@@ -104,13 +111,16 @@ namespace Vetrina.Server
             // Configure options.
             services.Configure<JwtOptions>(Configuration.GetSection(nameof(JwtOptions)));
             services.Configure<SmtpOptions>(Configuration.GetSection(nameof(SmtpOptions)));
+            services.Configure<FeatureFlagsOptions>(Configuration.GetSection(nameof(FeatureFlagsOptions)));
 
             // Add services.
             services.AddScoped<IUsersService, UsersService>();
             services.AddScoped<IEmailService, SmtpEmailService>();
             services.AddScoped<IAuthenticationService, AuthenticationService>();
             services.AddScoped<IWebDriverFactory, ChromeWebDriverFactory>();
+            services.AddScoped<IPromotionsClient, PromotionsClient>();
             services.AddSingleton<ILuceneIndex, InMemoryLuceneIndex>();
+
             services.AddSingleton<ITransliterationService, InMemoryTransliterationService>();
 
             services.AddControllersWithViews()
@@ -120,9 +130,24 @@ namespace Vetrina.Server
 
             services.AddRazorPages();
 
+            services.AddScoped(sp =>
+                new HttpClient
+                {
+                    BaseAddress = new Uri("http://vetrina-001-site1.etempurl.com/")
+                });
+
             // Creates the hangfire database if it doesn't exist.
             // TODO: It's better to move this outside of the code, and make it a step in the deployment pipeline.
             EnsureHangfireDatabaseExists(hangfireDatabaseConnectionString);
+        }
+
+        private void CurrentDomain_FirstChanceException(object sender, System.Runtime.ExceptionServices.FirstChanceExceptionEventArgs e)
+        {
+            lock (syncLock)
+            {
+                File.AppendAllText("DEBA.txt", $"{e.Exception.ToString()}");
+                File.AppendAllText("DEBA.txt", $"{Environment.NewLine}");
+            }
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -147,7 +172,7 @@ namespace Vetrina.Server
 
                 // The default HSTS value is 30 days.
                 // You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-                app.UseHsts();
+                //app.UseHsts();
             }
 
             // Enable the Swagger UI middleware and the Swagger generator.
@@ -158,7 +183,7 @@ namespace Vetrina.Server
             app.UseHangfireDashboard();
 
             app.UseHttpsRedirection();
-            
+
             app.UseBlazorFrameworkFiles();
             
             app.UseStaticFiles();

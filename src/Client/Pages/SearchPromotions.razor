@@ -1,5 +1,4 @@
-﻿@page "/"
-@page "/promotions/search"
+﻿@page "/search"
 
 @using Blazored.LocalStorage
 @using System.Diagnostics
@@ -15,8 +14,8 @@
 @inject IShoppingListService shoppingListService;
 
 <MudContainer Class="mt-12">
-    <MudText Align="Align.Center">
-        <img src="/resources/Salad.svg" style="height: 140px;" />
+    <MudText Align="Align.Center" Typo="Typo.h4">
+        Промоции
     </MudText>
     <MudGrid>
         <MudItem md="2" lg="2" xl="2"></MudItem>
@@ -29,7 +28,6 @@
                                   OnDebounceIntervalElapsed="SearchAsync"
                                   @bind-Value="SearchPromotionsRequest.SearchTerm"
                                   Immediate="true"
-                                  Label="Търси"
                                   Margin="Margin.Dense"
                                   FullWidth="true"
                                   Variant="Variant.Outlined"
@@ -61,11 +59,10 @@
                     </MudCheckBox>
                 </MudItem>
             </MudGrid>
-            <MudSlider @bind-Value="@SearchPromotionsRequest.MaxNumberOfDocs" Step="2" Max="100" Min="2" Color="Color.Primary"></MudSlider>
 
             @if (this.SearchPromotionsResponse != null)
             {
-                <MudText Align="Align.Center" Typo="Typo.body2" Color="Color.Default" Style="opacity: 0.8; font-style: oblique;">
+                <MudText GutterBottom="true" Align="Align.Center" Typo="Typo.body2" Color="Color.Default" Style="opacity: 0.8; font-style: oblique;">
                     Върнати са @this.SearchPromotionsResponse.Documents.Count от общо @this.SearchPromotionsResponse.TotalHits резултати
                     за @(this.EndToEndLatencySecs) секунди
                 </MudText>
@@ -86,8 +83,8 @@
         <MudGrid>
             @foreach (var promotion in this.SearchPromotionsResponse.Documents)
             {
-                <MudItem xs="12" sm="6" md="4" lg="4" xl="3" xxl="2">
-                    <MudCard Class="mx-4">
+                <MudItem xs="12" sm="6" md="4" lg="3" xl="2" xxl="2">
+                    <MudCard Class="ml-3" Elevation="3">
                         <MudCardHeader>
                             <CardHeaderAvatar>
                                 <MudAvatar Elevation="2" Size="Size.Large"
@@ -97,13 +94,12 @@
                             </CardHeaderAvatar>
                             <CardHeaderContent>
                                 <MudText Typo="Typo.body1" Align="Align.Left">
-                                    <strong title="@promotion.Document.DescriptionRaw" class="cut-text">@promotion.Document.DescriptionRaw</strong>
+                                    <p title="@promotion.Document.DescriptionRaw" class="cut-text">@promotion.Document.DescriptionRaw</p>
                                 </MudText>
                             </CardHeaderContent>
                         </MudCardHeader>
-                        <MudCardMedia Image="@promotion.Document.ImageUrl" Class="promotion-card-small" />
+                        <MudCardMedia Image="@promotion.Document.ImageUrl" Class="promotion-card-small" Height="200" />
                         <MudCardContent>
-                            @*<img src="@promotion.Document.ImageUrl" class="promotion-card-small" >*@
                             @if (this.shoppingList.Any(x => x.Promotion.Id == promotion.Document.Id))
                             {
                                 <MudButton OnClick="() => TryRemoveFromShoppingList(promotion.Document)"
@@ -162,7 +158,9 @@
     public SearchPromotionsRequest SearchPromotionsRequest { get; set; } =
         new SearchPromotionsRequest
             {
-                MaxNumberOfDocs = 24
+                MaxNumberOfDocs = 24,
+                IncludeKaufland = true,
+                IncludeLidl = true
             };
 
     public LuceneSearchResponseOfPromotion SearchPromotionsResponse { get; set; }

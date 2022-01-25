@@ -58,6 +58,10 @@ a, .btn-link {
         top: 0.5rem;
     }
 
+.border-bottom-transparent {
+    border-bottom-style: inset;
+}
+
 .page-wrapper {
     min-height: 100%;
     display: flex;
@@ -109,8 +113,7 @@ a, .btn-link {
 
 .promotion-card-small {
     object-fit: cover;
-    width: 90%;
-    height: 160px;
+    width: 100%;
 }
 
 .cut-text {
@@ -140,15 +143,15 @@ a, .btn-link {
 
 @keyframes shakeCart {
     25% {
-        transform: translateX(6px);
+        transform: translateX(8px);
     }
 
     50% {
-        transform: translateX(-4px);
+        transform: translateX(-6px);
     }
 
     75% {
-        transform: translateX(2px);
+        transform: translateX(3px);
     }
 
     100% {

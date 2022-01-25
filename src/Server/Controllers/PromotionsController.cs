@@ -1,18 +1,27 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Lucene.Net.Index;
 using Lucene.Net.Queries;
 using Lucene.Net.Search;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Vetrina.Autogen.API.Client.Contracts;
 using Vetrina.Server.Abstractions;
 using Vetrina.Server.Controllers.Abstract;
 using Vetrina.Server.Domain;
-using Vetrina.Server.Models;
 using Vetrina.Server.Persistence;
 using Vetrina.Shared;
 using Vetrina.Shared.SearchModels;
+using BrowsePromotionsRequest = Vetrina.Server.Models.BrowsePromotionsRequest;
+using BrowsePromotionsResponse = Vetrina.Server.Models.BrowsePromotionsResponse;
+using GetPromotionResponse = Vetrina.Server.Models.GetPromotionResponse;
+using GetPromotionResponseType = Vetrina.Server.Models.GetPromotionResponseType;
+using Promotion = Vetrina.Shared.Promotion;
+using SearchPromotionsRequest = Vetrina.Server.Models.SearchPromotionsRequest;
+using Store = Vetrina.Shared.Store;
 
 namespace Vetrina.Server.Controllers
 {
@@ -23,15 +32,19 @@ namespace Vetrina.Server.Controllers
         private readonly VetrinaDbContext vetrinaDbContext;
         private readonly ILuceneIndex luceneIndex;
         private readonly ITransliterationService transliterationService;
+        private readonly IPromotionsClient promotionsClient;
+        private readonly IHttpClientFactory httpClientFactory;
 
         public PromotionsController(
             VetrinaDbContext vetrinaDbContext,
             ILuceneIndex luceneIndex,
-            ITransliterationService transliterationService)
+            ITransliterationService transliterationService,
+            IPromotionsClient promotionsClient)
         {
             this.vetrinaDbContext = vetrinaDbContext;
             this.luceneIndex = luceneIndex;
             this.transliterationService = transliterationService;
+            this.promotionsClient = promotionsClient;
         }
 
         [HttpPost("search")]
@@ -134,6 +147,40 @@ namespace Vetrina.Server.Controllers
             return new GetPromotionResponse(GetPromotionResponseType.Successful, promotion);
         }
 
+        //[HttpPost("send-to-external-server")]
+        //public async Task<ActionResult<int>> SendPromotionsToExternalServer(SendPromotionsToExternalServerRequest request)
+        //{
+        //    var promotions = await this.vetrinaDbContext.Promotions.Where(x => x.Store == request.Store).ToListAsync();
+
+        //    var seededPromotionsCount = await this.promotionsClient.SeedPromotionsAsync(
+        //        promotions.Select(x => new Autogen.API.Client.Contracts.Promotion
+        //        {
+        //            DescriptionRaw = x.DescriptionRaw,
+        //            DescriptionSearch = x.DescriptionSearch,
+        //            DiscountPercentage = x.DiscountPercentage,
+        //            Id = x.Id,
+        //            Store = (Autogen.API.Client.Contracts.Store)x.Store,
+        //            ImageUrl = x.ImageUrl,
+        //            OfficialPrice = x.OfficialPrice,
+        //            Price = x.Price,
+        //            PriceRaw = x.PriceRaw,
+        //            PromotionEndingAt = x.PromotionEndingAt,
+        //            PromotionStartingFrom = x.PromotionStartingFrom
+        //        }).ToList());
+
+        //    return this.Ok(seededPromotionsCount);
+        //}
+
+        [HttpPost("seed")]
+        public async Task<ActionResult<int>> SeedPromotions(List<Promotion> promotions)
+        {
+            await this.vetrinaDbContext.AddRangeAsync(promotions);
+
+            var affectedRecords = await this.vetrinaDbContext.SaveChangesAsync();
+
+            return this.Ok(affectedRecords);
+        }
+
         private static Filter CreateStoreTermFilter(Store store)
         {
             var filter =
@@ -147,5 +194,12 @@ namespace Vetrina.Server.Controllers
 
             return filter;
         }
+    }
+
+    public class SendPromotionsToExternalServerRequest
+    {
+        public string ExternalServerUrl { get; set; }
+
+        public Store Store { get; set; }
     }
 }

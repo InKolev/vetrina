@@ -16,6 +16,38 @@ using Vetrina.Shared.SearchModels;
 
 namespace Vetrina.Server.Services
 {
+    public class FakeLuceneIndex : ILuceneIndex
+    {
+        public void Dispose()
+        {
+        }
+
+        public async Task IndexDocumentAsync(Document document)
+        {
+        }
+
+        public async Task IndexDocumentsAsync(IEnumerable<Document> documents)
+        {
+        }
+
+        public async Task DeleteAllDocuments()
+        {
+        }
+
+        public async Task DeleteAllDocumentsWhere(Query query)
+        {
+        }
+
+        public async Task DeleteAllDocumentsWhere(Term term)
+        {
+        }
+
+        public async Task<LuceneSearchResponse<Promotion>> SearchAsync(Query query, Sort sortBy = null, Filter filter = null, int? maxNumberOfDocuments = null)
+        {
+            return new LuceneSearchResponse<Promotion>();
+        }
+    }
+
     public class InMemoryLuceneIndex : ILuceneIndex
     {
         private const LuceneVersion AppLuceneVersion = LuceneVersion.LUCENE_48;

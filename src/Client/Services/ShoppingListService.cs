@@ -27,11 +27,11 @@ public class ShoppingListService : IShoppingListService
 
         this.applicationState.NotifyShoppingListStateChanged(shoppingList);
 
-        await Task.Delay(TimeSpan.FromMilliseconds(800));
+        await Task.Delay(TimeSpan.FromMilliseconds(400));
 
         this.applicationState.ShakeCartClass = string.Empty;
 
-        //this.applicationState.NotifyShoppingListStateChanged(shoppingList);
+        this.applicationState.NotifyShoppingListStateChanged(shoppingList);
     }
 
     public async Task IncreaseQuantityInShoppingList(Promotion promotion)

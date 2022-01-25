@@ -11,8 +11,39 @@
 @inject IShoppingListService shoppingListService;
 
 <MudGrid>
-    <MudItem xs="12" sm="12" md="12" lg="12" xl="12" xxl="12">
-        <MudTable Virtualize="true" SelectedItems="SelectedItems" RowsPerPage="25" Items="this.shoppingList" MultiSelection="true" Hover="true" SortLabel="Сортирай по" AllowUnsorted="false" Elevation="0">
+    @if (this.shoppingList.Any())
+    {
+        <MudItem xs="12" sm="12" md="12" lg="12" xl="12" xxl="12"></MudItem>
+
+        <MudItem xs="12" sm="12" md="12" lg="12" xl="12" xxl="12">
+            <MudGrid>
+                <MudItem xs="12" sm="12" md="6" lg="4" xl="4" xxl="4">
+                    <MudPaper Elevation="2" Class="mx-4">
+                        <MudButton Class="pa-4" Variant="Variant.Text" FullWidth="true" Color="Color.Transparent" Size="Size.Medium" OnClick="CopySelectedShoppingItemsToClipboard">
+                            Копирай избраните
+                        </MudButton>
+                    </MudPaper>
+                </MudItem>
+                <MudItem xs="12" sm="12" md="6" lg="4" xl="4" xxl="4">
+                    <MudPaper Elevation="2" Class="mx-4">
+                        <MudButton Class="pa-4" Variant="Variant.Text" FullWidth="true" Color="Color.Surface" Size="Size.Medium" OnClick="CopyEntireShoppingListToClipboard">
+                            Копирай всички
+                        </MudButton>
+                    </MudPaper>
+                </MudItem>
+                <MudItem xs="12" sm="12" md="6" lg="4" xl="4" xxl="4">
+                    <MudPaper Elevation="2" Class="mx-4">
+                        <MudButton Class="pa-4" Variant="Variant.Text" FullWidth="true" Color="Color.Warning" StartIcon="@Icons.Material.Filled.ClearAll" Size="Size.Medium" OnClick="ClearShoppingList">
+                            Изчисти кошницата
+                        </MudButton>
+                    </MudPaper>
+                </MudItem>
+            </MudGrid>
+        </MudItem>
+    }
+
+    <MudItem xs="12" sm="12" md="12" lg="12" xl="12" xxl="12" class="mx-4">
+        <MudTable Class="mt-4" Virtualize="true" SelectedItems="SelectedItems" Dense="true" RowsPerPage="25" Items="this.shoppingList" MultiSelection="true" Hover="true" SortLabel="Сортирай по" AllowUnsorted="false" Elevation="0">
             <NoRecordsContent>
                 <MudText Typo="Typo.h5" Align="Align.Center">
                     Кошницата е празна
@@ -45,34 +76,6 @@
             </PagerContent>
         </MudTable>
     </MudItem>
-    @if (this.shoppingList.Any())
-    {
-        <MudItem xs="12" sm="12" md="12" lg="12" xl="12" xxl="12">
-            <MudGrid>
-                <MudItem xs="12" sm="12" md="6" lg="4" xl="4" xxl="4">
-                    <MudPaper Elevation="2" Class="mx-4">
-                        <MudButton Class="pa-4" Variant="Variant.Text" FullWidth="true" Color="Color.Transparent" Size="Size.Medium" OnClick="CopySelectedShoppingItemsToClipboard">
-                            Копирай избраните
-                        </MudButton>
-                    </MudPaper>
-                </MudItem>
-                <MudItem xs="12" sm="12" md="6" lg="4" xl="4" xxl="4">
-                    <MudPaper Elevation="2" Class="mx-4">
-                        <MudButton Class="pa-4" Variant="Variant.Text" FullWidth="true" Color="Color.Surface" Size="Size.Medium" OnClick="CopyEntireShoppingListToClipboard">
-                            Копирай всички
-                        </MudButton>
-                    </MudPaper>
-                </MudItem>
-                <MudItem xs="12" sm="12" md="6" lg="4" xl="4" xxl="4">
-                    <MudPaper Elevation="2" Class="mx-4">
-                        <MudButton Class="pa-4" Variant="Variant.Text" FullWidth="true" Color="Color.Warning" StartIcon="@Icons.Material.Filled.ClearAll" Size="Size.Medium" OnClick="ClearShoppingList">
-                            Изчисти кошницата
-                        </MudButton>
-                    </MudPaper>
-                </MudItem>
-            </MudGrid>
-        </MudItem>
-    }
 </MudGrid>
 
 @code {
@@ -114,6 +117,16 @@
 
     public void CopySelectedShoppingItemsToClipboard()
     {
+        if (!this.SelectedItems.Any())
+        {
+            this.snackbarService.Clear();
+            this.snackbarService.Configuration.PositionClass = Defaults.Classes.Position.BottomCenter;
+            this.snackbarService.Configuration.SnackbarVariant = Variant.Outlined;
+            this.snackbarService.Add("Не сте избрали продукти от кошницата.", Severity.Warning);
+
+            return;
+        }
+
         var itemsByStore = this.SelectedItems.GroupBy(x => x.Promotion.Store);
 
         var basketBuilder = new StringBuilder();
@@ -138,6 +151,7 @@
             }
 
             basketBuilder.AppendLine($"Обща сума за магазин {storeName} - {Math.Round(totalStorePrice, 2, MidpointRounding.ToEven)} BGN");
+            basketBuilder.AppendLine($"Общ брой продукти за магазин {storeName} - {storeGroup.Count()}.");
             basketBuilder.AppendLine(Environment.NewLine);
         }
 
@@ -148,18 +162,19 @@
         this.snackbarService.Clear();
         this.snackbarService.Configuration.PositionClass = Defaults.Classes.Position.BottomCenter;
         this.snackbarService.Configuration.SnackbarVariant = Variant.Outlined;
-        this.snackbarService.Add("Списъкът от кошницата беше успешно копиран.", Severity.Success);
+        this.snackbarService.Add("Списъкът с продукти от кошницата беше успешно копиран.", Severity.Success);
     }
 
     public async Task CopyEntireShoppingListToClipboard()
     {
-        var itemsByStore = (await this.shoppingListRepository.GetAllItemsAsync()).GroupBy(x => x.Promotion.Store);
+        var allShoppingItems = await this.shoppingListRepository.GetAllItemsAsync();
+        var shoppingItemsGroupedByStore = allShoppingItems.GroupBy(x => x.Promotion.Store);
 
         var basketBuilder = new StringBuilder();
 
         var totalBasketPrice = 0d;
 
-        foreach (var storeGroup in itemsByStore)
+        foreach (var storeGroup in shoppingItemsGroupedByStore)
         {
             var storeName = storeGroup.Key.ToString();
             var totalStorePrice = 0d;
@@ -175,7 +190,8 @@
                 totalStorePrice += totalItemPrice;
             }
 
-            basketBuilder.AppendLine($"Обща сума за магазин {storeName} - {Math.Round(totalStorePrice, 2, MidpointRounding.ToEven)} BGN");
+            basketBuilder.AppendLine($"Обща сума за магазин {storeName} - {Math.Round(totalStorePrice, 2, MidpointRounding.ToEven)} BGN.");
+            basketBuilder.AppendLine($"Общ брой продукти за магазин {storeName} - {storeGroup.Count()}.");
             basketBuilder.AppendLine(Environment.NewLine);
         }
 

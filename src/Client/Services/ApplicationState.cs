@@ -8,15 +8,13 @@ namespace Vetrina.Client.Services
     {
         public event Action ThemeColorChanged;
 
-        //public event Action ShoppingListChanged;
-
         public event Action<List<ShoppingListItem>> ShoppingListChanged;
 
         public string ShakeCartClass { get; set; }
 
         public string TossToCartClass { get; set; }
 
-        public Color MainThemeColor { get; private set; } = Color.Primary;
+        public Color MainThemeColor { get; private set; } = Color.Tertiary;
 
         public void SwitchColor()
         {
@@ -48,6 +46,11 @@ namespace Vetrina.Client.Services
                         break;
                     }
                 case Color.Warning:
+                    {
+                        MainThemeColor = Color.Transparent;
+                        break;
+                    }
+                case Color.Transparent:
                     {
                         MainThemeColor = Color.Primary;
                         break;

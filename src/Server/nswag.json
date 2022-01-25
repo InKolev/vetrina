@@ -117,7 +117,7 @@
       "dictionaryBaseType": "System.Collections.Generic.Dictionary",
       "classStyle": "Poco",
       "generateDefaultValues": true,
-      "generateDataAnnotations": false,
+      "generateDataAnnotations": true,
       "excludedTypeNames": [],
       "excludedParameterNames": [],
       "handleReferences": false,
