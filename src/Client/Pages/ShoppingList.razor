@@ -12,7 +12,7 @@
 
 <MudContainer Class="mt-6">
     <MudGrid>
-        <MudItem xs="12" sm="12" md="12" lg="12" xl="12" xxl="12" class="mx-4">
+        <MudItem xs="12" sm="12" md="12" lg="12" xl="12" xxl="12">
             <MudTable Class="mt-4" Virtualize="true" SelectedItems="SelectedItems" Dense="true" RowsPerPage="25" Items="this.shoppingList" MultiSelection="true" Hover="true" SortLabel="Сортирай по" AllowUnsorted="false" Elevation="0">
                 <NoRecordsContent>
                     <MudText Typo="Typo.h5" Align="Align.Center">
@@ -31,9 +31,9 @@
                     <MudTd DataLabel="Продукт">@context.Promotion.DescriptionRaw</MudTd>
                     <MudTd DataLabel="Цена">@context.Promotion.Price</MudTd>
                     <MudTd DataLabel="Количество">
-                        <MudIconButton Icon="@Icons.Material.Filled.Add" OnClick="() => this.shoppingListService.IncreaseQuantityInShoppingList(context.Promotion)" />
+                        <MudIconButton Icon="@Icons.Material.Filled.Add" Size="Size.Small" OnClick="() => this.shoppingListService.IncreaseQuantityInShoppingList(context.Promotion)" />
                         @context.Quantity
-                        <MudIconButton Icon="@Icons.Material.Filled.Remove" OnClick="() => this.shoppingListService.DecreaseQuantityInShoppingList(context.Promotion)" />
+                        <MudIconButton Icon="@Icons.Material.Filled.Remove" Size="Size.Small" OnClick="() => this.shoppingListService.DecreaseQuantityInShoppingList(context.Promotion)" />
                     </MudTd>
                     <MudTd DataLabel="Обща сума">@(Math.Round(context.Quantity * context.Promotion.Price, 2, MidpointRounding.ToEven))</MudTd>
                     <MudTd DataLabel="Магазин">@context.Promotion.Store.ToString()</MudTd>
