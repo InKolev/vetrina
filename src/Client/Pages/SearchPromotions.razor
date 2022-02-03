@@ -1,4 +1,5 @@
-﻿@page "/search"
+﻿@page "/"
+@page "/search"
 
 @using Blazored.LocalStorage
 @using System.Diagnostics
@@ -14,10 +15,10 @@
 @inject IShoppingListService shoppingListService;
 
 <MudContainer Class="mt-12">
-    <MudText Align="Align.Center" Typo="Typo.h4">
-        Промоции
+    <MudText Align="Align.Center" Typo="Typo.h4" GutterBottom="true">
+        Актуални предложения
     </MudText>
-    <MudGrid>
+    <MudGrid Spacing="2">
         <MudItem md="2" lg="2" xl="2"></MudItem>
         <MudItem xs="12" sm="12" md="8" lg="8" xl="8">
             <MudGrid>
@@ -70,8 +71,8 @@
         </MudItem>
         <MudItem md="2" lg="2" xl="2"></MudItem>
     </MudGrid>
-</MudContainer>
 
+    
 @if (this.SearchPromotionsResponse != null && this.SearchPromotionsResponse.Documents.Any())
 {
     @if (this.LoadingSearchResults)
@@ -83,7 +84,7 @@
         <MudGrid>
             @foreach (var promotion in this.SearchPromotionsResponse.Documents)
             {
-                <MudItem xs="12" sm="6" md="4" lg="3" xl="2" xxl="2">
+                <MudItem xs="12" sm="6" md="4" lg="3" xl="3" xxl="2">
                     <MudCard Class="ml-3" Elevation="3">
                         <MudCardHeader>
                             <CardHeaderAvatar>
@@ -133,6 +134,8 @@
         </MudGrid>
     }
 }
+</MudContainer>
+
 
 @code
 {
