@@ -4,7 +4,8 @@
     {
         NotSet = 0,
         Kaufland = 1,
-        Lidl = 2
+        Lidl = 2,
+        Billa = 3
     }
 
     public static class StoreExtensions

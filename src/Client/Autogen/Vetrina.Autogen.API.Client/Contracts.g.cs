@@ -102,13 +102,6 @@ namespace Vetrina.Autogen.API.Client.Contracts
         System.Threading.Tasks.Task<GetPromotionResponse> GetPromotionAsync(int promotionId, System.Threading.CancellationToken cancellationToken);
 
         /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<int> SendPromotionsToExternalServerAsync(SendPromotionsToExternalServerRequest request);
-
-        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        /// <exception cref="SwaggerException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<int> SendPromotionsToExternalServerAsync(SendPromotionsToExternalServerRequest request, System.Threading.CancellationToken cancellationToken);
-
-        /// <exception cref="SwaggerException">A server side error occurred.</exception>
         System.Threading.Tasks.Task<int> SeedPromotionsAsync(System.Collections.Generic.IEnumerable<Promotion> promotions);
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
@@ -831,6 +824,8 @@ namespace Vetrina.Autogen.API.Client.Contracts
 
         Lidl = 2,
 
+        Billa = 3,
+
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "13.15.5.0 (NJsonSchema v10.6.6.0 (Newtonsoft.Json v13.0.0.0))")]
@@ -958,30 +953,6 @@ namespace Vetrina.Autogen.API.Client.Contracts
         ValidationError = 3,
 
         NotFound = 4,
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "13.15.5.0 (NJsonSchema v10.6.6.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class SendPromotionsToExternalServerRequest
-    {
-        [Newtonsoft.Json.JsonProperty("externalServerUrl", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public string ExternalServerUrl { get; set; }
-
-        [Newtonsoft.Json.JsonProperty("store", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public Store Store { get; set; }
-
-        public string ToJson()
-        {
-
-            return Newtonsoft.Json.JsonConvert.SerializeObject(this, new Newtonsoft.Json.JsonSerializerSettings());
-
-        }
-        public static SendPromotionsToExternalServerRequest FromJson(string data)
-        {
-
-            return Newtonsoft.Json.JsonConvert.DeserializeObject<SendPromotionsToExternalServerRequest>(data, new Newtonsoft.Json.JsonSerializerSettings());
-
-        }
 
     }
 

@@ -27,11 +27,15 @@ namespace Vetrina.Server.HostedServices
             // Schedule recurring jobs.
             AddOrUpdateRecurringJob<IScrapeKauflandPromotionsJob>(
                 CancellationToken.None,
-                Cron.Weekly());
+                Cron.Weekly(DayOfWeek.Monday, 1, 0));
 
             AddOrUpdateRecurringJob<IScrapeLidlPromotionsJob>(
                 CancellationToken.None,
-                Cron.Weekly());
+                Cron.Weekly(DayOfWeek.Monday, 1, 15));
+
+            AddOrUpdateRecurringJob<IScrapeBillaPromotionsJob>(
+                CancellationToken.None,
+                Cron.Weekly(DayOfWeek.Monday, 1, 30));
 
             return Task.CompletedTask;
         }

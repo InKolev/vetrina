@@ -82,10 +82,13 @@ namespace Vetrina.Server.Controllers
             var luceneFilter = new BooleanFilter();
 
             // If none of the store flags is enabled, search in all stores by default.
-            if (!searchPromotionsRequest.IncludeKaufland && !searchPromotionsRequest.IncludeLidl)
+            if (!searchPromotionsRequest.IncludeKaufland 
+                && !searchPromotionsRequest.IncludeLidl 
+                && !searchPromotionsRequest.IncludeBilla)
             {
                 luceneFilter.Add(CreateStoreTermFilter(Store.Kaufland), Occur.SHOULD);
                 luceneFilter.Add(CreateStoreTermFilter(Store.Lidl), Occur.SHOULD);
+                luceneFilter.Add(CreateStoreTermFilter(Store.Billa), Occur.SHOULD);
             }
             else
             {
@@ -97,6 +100,11 @@ namespace Vetrina.Server.Controllers
                 if (searchPromotionsRequest.IncludeKaufland)
                 {
                     luceneFilter.Add(CreateStoreTermFilter(Store.Kaufland), Occur.SHOULD);
+                }
+
+                if (searchPromotionsRequest.IncludeBilla)
+                {
+                    luceneFilter.Add(CreateStoreTermFilter(Store.Billa), Occur.SHOULD);
                 }
             }
 

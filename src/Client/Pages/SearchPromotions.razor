@@ -50,7 +50,6 @@
                     </MudCheckBox>
                     <MudCheckBox @bind-Checked="@SearchPromotionsRequest.IncludeBilla"
                                  Label="Търси в Billa"
-                                 Disabled="true"
                                  Color="Color.Primary">
                     </MudCheckBox>
                     <MudCheckBox @bind-Checked="@SearchPromotionsRequest.IncludeFantastiko"
@@ -89,8 +88,8 @@
                         <MudCardHeader>
                             <CardHeaderAvatar>
                                 <MudAvatar Elevation="2" Size="Size.Large"
-                               Square="@(promotion.Document.Store == Store.Kaufland ? true : false)"
-                               Image="@($"/resources/{promotion.Document.Store}.svg")">
+                                           Square="@(promotion.Document.Store == Store.Lidl ? false : true)"
+                                           Image="@($"/resources/{promotion.Document.Store.ToString()}.svg")">
                                 </MudAvatar>
                             </CardHeaderAvatar>
                             <CardHeaderContent>
@@ -163,7 +162,8 @@
             {
                 MaxNumberOfDocs = 24,
                 IncludeKaufland = true,
-                IncludeLidl = true
+                IncludeLidl = true,
+                IncludeBilla = true
             };
 
     public LuceneSearchResponseOfPromotion SearchPromotionsResponse { get; set; }

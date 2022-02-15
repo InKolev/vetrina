@@ -79,6 +79,7 @@ namespace Vetrina.Server
             // Add jobs.
             services.AddScoped<IScrapeKauflandPromotionsJob, ScrapeKauflandPromotionsJob>();
             services.AddScoped<IScrapeLidlPromotionsJob, ScrapeLidlPromotionsJob>();
+            services.AddScoped<IScrapeBillaPromotionsJob, ScrapeBillaPromotionsJob>();
 
             // Add Hangfire services.
             var hangfireDatabaseConnectionString =

@@ -19,8 +19,8 @@ using ExpectedConditions = SeleniumExtras.WaitHelpers.ExpectedConditions;
 
 namespace Vetrina.Server.Mediatr.CommandHandlers
 {
-    public class ScrapeLidlPromotionsCommandHandler : 
-        BaseScrapingCommandHandler<ScrapeLidlPromotionsCommandHandler>, 
+    public class ScrapeLidlPromotionsCommandHandler :
+        BaseScrapingCommandHandler<ScrapeLidlPromotionsCommandHandler>,
         IRequestHandler<ScrapeLidlPromotionsCommand, CommandResult>
     {
         private readonly IWebDriverFactory webDriverFactory;
@@ -32,7 +32,7 @@ namespace Vetrina.Server.Mediatr.CommandHandlers
             IWebDriverFactory webDriverFactory,
             IMediator mediator,
             ITransliterationService transliterationService,
-            ILogger<ScrapeLidlPromotionsCommandHandler> logger): base(logger)
+            ILogger<ScrapeLidlPromotionsCommandHandler> logger) : base(logger)
         {
             this.webDriverFactory = webDriverFactory;
             this.mediator = mediator;
@@ -75,7 +75,7 @@ namespace Vetrina.Server.Mediatr.CommandHandlers
                     request.PromotionWeek == PromotionWeek.ThisWeek
                         ? "#pageMain > div > section > div > ul > li:nth-child(1) > div:nth-child(2) > div > div > div.slider__body.slick-initialized.slick-slider > div > div > div > div > div > a"
                         : "#pageMain > div > section > div > ul > li:nth-child(2) > div:nth-child(2) > div > div > div.slider__body.slick-initialized.slick-slider > div > div > div > div > div > a";
-               
+
                 var categories =
                     webDriver.FindElementsToBePresent(
                         By.CssSelector(categoriesSelector)).ToList();
