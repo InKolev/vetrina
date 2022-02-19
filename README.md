@@ -1,3 +1,3 @@
 # Vetrina
 
-Next level groceries and promotions exploration tool. A shopping list on steroids.  
+Next generation promotions exploration tool. A shopping list on steroids.
