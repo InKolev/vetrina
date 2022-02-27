@@ -12,8 +12,8 @@ using Vetrina.Server.Persistence;
 namespace Vetrina.Server.Migrations
 {
     [DbContext(typeof(VetrinaDbContext))]
-    [Migration("20220120204542_Initial_Migration_Create_Vetrina_DB")]
-    partial class Initial_Migration_Create_Vetrina_DB
+    [Migration("20220221230644_Initial")]
+    partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -121,8 +121,8 @@ namespace Vetrina.Server.Migrations
                     b.Property<string>("ImageUrl")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("OfficialPrice")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<double>("OfficialPrice")
+                        .HasColumnType("float");
 
                     b.Property<double>("Price")
                         .HasColumnType("float");

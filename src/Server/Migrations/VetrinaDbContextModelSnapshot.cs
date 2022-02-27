@@ -119,8 +119,8 @@ namespace Vetrina.Server.Migrations
                     b.Property<string>("ImageUrl")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("OfficialPrice")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<double>("OfficialPrice")
+                        .HasColumnType("float");
 
                     b.Property<double>("Price")
                         .HasColumnType("float");

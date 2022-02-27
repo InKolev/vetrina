@@ -71,68 +71,134 @@
         <MudItem md="2" lg="2" xl="2"></MudItem>
     </MudGrid>
 
-    
-@if (this.SearchPromotionsResponse != null && this.SearchPromotionsResponse.Documents.Any())
-{
-    @if (this.LoadingSearchResults)
+
+    @if (this.SearchPromotionsResponse != null && this.SearchPromotionsResponse.Documents.Any())
     {
-        <MudProgressCircular Color="Color.Primary" Size="Size.Large" Indeterminate="true" />
+        @if (this.LoadingSearchResults)
+        {
+            <MudProgressCircular Color="Color.Primary" Size="Size.Large" Indeterminate="true" />
+        }
+        else
+        {
+            <MudGrid>
+                @foreach (var promotion in this.SearchPromotionsResponse.Documents)
+                {
+                    var isPromotionAvailableToday = DateTime.UtcNow.Date >= promotion.Document.PromotionStartingFrom.Date && DateTime.UtcNow.Date <= promotion.Document.PromotionEndingAt.Date;
+
+                    @if (this.shoppingList.Any(x => x.Promotion.Id == promotion.Document.Id))
+                    {
+                        <MudItem xs="12" sm="6" md="4" lg="3" xl="3" xxl="2">
+                            <MudCard Class="ml-3 box" Elevation="3" Style="box-shadow: 0px 0px 12px rgba(255, 167, 3, 0.8);">
+                                <div onclick="@(() => TryRemoveFromShoppingList(promotion.Document))" style="cursor: pointer">
+                                    <div class="@(isPromotionAvailableToday ? "ribbon-green" : "ribbon")"><span>@promotion.Document.PromotionStartingFrom.ToString("dd/MM") — @promotion.Document.PromotionEndingAt.ToString("dd/MM")</span></div>
+                                    <MudCardHeader>
+                                        <CardHeaderAvatar>
+                                            <MudAvatar Elevation="2" Size="Size.Large"
+                                       Square="@(promotion.Document.Store == Store.Lidl ? false : true)"
+                                       Image="@($"/resources/{promotion.Document.Store.ToString()}.svg")">
+                                            </MudAvatar>
+                                        </CardHeaderAvatar>
+                                        <CardHeaderContent>
+                                            <MudText Typo="Typo.body1" Align="Align.Left">
+                                                <p title="@promotion.Document.DescriptionRaw" class="cut-text">@promotion.Document.DescriptionRaw</p>
+                                            </MudText>
+                                        </CardHeaderContent>
+                                    </MudCardHeader>
+                                    <MudCardMedia Image="@promotion.Document.ImageUrl" Class="promotion-card-small" Height="200" />
+                                    <MudCardContent>
+                                        <MudGrid>
+                                            <MudItem xs="12" sm="12" md="12" lg="12" xl="12" xxl="12" Style="font-weight: bold; margin-bottom:0px; padding-bottom: 0px;">
+                                                @if (promotion.Document.OfficialPrice != 0)
+                                                {
+                                                    <MudText Style="font-size: smaller;" Align="Align.End" Color="Color.Error">
+                                                        <del>@($"{promotion.Document.OfficialPrice} лв")</del>
+                                                    </MudText>
+                                                }
+                                                else
+                                                {
+                                                    <MudText Style="font-size: smaller;" Align="Align.End" Color="Color.Error">
+                                                        <del>@($"{promotion.Document.Price} лв")</del>
+                                                    </MudText>
+                                                }
+                                            </MudItem>
+                                            <MudItem xs="6" sm="6" md="6" lg="6" xl="6" xxl="6">
+                                                @if (!string.IsNullOrWhiteSpace(promotion.Document.DiscountPercentage))
+                                                {
+                                                    <MudText Style="font-size: larger; font-weight: bolder;" Align="Align.Left" Color="Color.Tertiary">
+                                                        @($"-{promotion.Document.DiscountPercentage}%")
+                                                    </MudText>
+                                                }
+                                            </MudItem>
+                                            <MudItem xs="6" sm="6" md="6" lg="6" xl="6" xxl="6">
+                                                <MudText Style="font-size: larger; font-weight: bolder" Color="Color.Error" Align="Align.Right">
+                                                    @($"{promotion.Document.Price.ToString("C").Replace("$", string.Empty)} лв")
+                                                </MudText>
+                                            </MudItem>
+                                        </MudGrid>
+                                    </MudCardContent>
+                                </div>
+                            </MudCard>
+                        </MudItem>
+                    }
+                    else
+                    {
+                        <MudItem xs="12" sm="6" md="4" lg="3" xl="3" xxl="2">
+                            <MudCard Class="ml-3 box" Elevation="3">
+                                <div onclick="@(() => AddToCart(promotion.Document))" style="cursor: pointer;" class="@applicationState.TossToCartClass">
+                                    <div class="@(isPromotionAvailableToday ? "ribbon-green" : "ribbon")"><span>@promotion.Document.PromotionStartingFrom.ToString("dd/MM") — @promotion.Document.PromotionEndingAt.ToString("dd/MM")</span></div>
+                                    <MudCardHeader>
+                                        <CardHeaderAvatar>
+                                            <MudAvatar Elevation="2" Size="Size.Large"
+                                       Square="@(promotion.Document.Store == Store.Lidl ? false : true)"
+                                       Image="@($"/resources/{promotion.Document.Store.ToString()}.svg")">
+                                            </MudAvatar>
+                                        </CardHeaderAvatar>
+                                        <CardHeaderContent>
+                                            <MudText Typo="Typo.body1" Align="Align.Left">
+                                                <p title="@promotion.Document.DescriptionRaw" class="cut-text">@promotion.Document.DescriptionRaw</p>
+                                            </MudText>
+                                        </CardHeaderContent>
+                                    </MudCardHeader>
+                                    <MudCardMedia Image="@promotion.Document.ImageUrl" Class="promotion-card-small" Height="200" />
+                                    <MudCardContent>
+                                        <MudGrid>
+                                            <MudItem xs="12" sm="12" md="12" lg="12" xl="12" xxl="12" Style="font-weight: bold; margin-bottom:0px; padding-bottom: 0px;">
+                                                @if (promotion.Document.OfficialPrice != 0)
+                                                {
+                                                    <MudText Style="font-size: smaller;" Align="Align.End" Color="Color.Error">
+                                                        <del>@($"{promotion.Document.OfficialPrice} лв")</del>
+                                                    </MudText>
+                                                }
+                                                else
+                                                {
+                                                    <MudText Style="font-size: smaller;" Align="Align.End" Color="Color.Error">
+                                                        <del>@($"{promotion.Document.Price} лв")</del>
+                                                    </MudText>
+                                                }
+                                            </MudItem>
+                                            <MudItem xs="6" sm="6" md="6" lg="6" xl="6" xxl="6">
+                                                @if (!string.IsNullOrWhiteSpace(promotion.Document.DiscountPercentage))
+                                                {
+                                                    <MudText Style="font-size: larger; font-weight: bolder;" Align="Align.Left" Color="Color.Tertiary">
+                                                        @($"-{promotion.Document.DiscountPercentage}%")
+                                                    </MudText>
+                                                }
+                                            </MudItem>
+                                            <MudItem xs="6" sm="6" md="6" lg="6" xl="6" xxl="6">
+                                                <MudText Style="font-size: larger; font-weight: bolder" Color="Color.Error" Align="Align.Right">
+                                                    @($"{promotion.Document.Price.ToString("C").Replace("$", string.Empty)} лв")
+                                                </MudText>
+                                            </MudItem>
+                                        </MudGrid>
+                                    </MudCardContent>
+                                </div>
+                            </MudCard>
+                        </MudItem>
+                    }
+                }
+            </MudGrid>
+        }
     }
-    else
-    {
-        <MudGrid>
-            @foreach (var promotion in this.SearchPromotionsResponse.Documents)
-            {
-                <MudItem xs="12" sm="6" md="4" lg="3" xl="3" xxl="2">
-                    <MudCard Class="ml-3" Elevation="3">
-                        <MudCardHeader>
-                            <CardHeaderAvatar>
-                                <MudAvatar Elevation="2" Size="Size.Large"
-                                           Square="@(promotion.Document.Store == Store.Lidl ? false : true)"
-                                           Image="@($"/resources/{promotion.Document.Store.ToString()}.svg")">
-                                </MudAvatar>
-                            </CardHeaderAvatar>
-                            <CardHeaderContent>
-                                <MudText Typo="Typo.body1" Align="Align.Left">
-                                    <p title="@promotion.Document.DescriptionRaw" class="cut-text">@promotion.Document.DescriptionRaw</p>
-                                </MudText>
-                            </CardHeaderContent>
-                        </MudCardHeader>
-                        <MudCardMedia Image="@promotion.Document.ImageUrl" Class="promotion-card-small" Height="200" />
-                        <MudCardContent>
-                            @if (this.shoppingList.Any(x => x.Promotion.Id == promotion.Document.Id))
-                            {
-                                <MudButton OnClick="() => TryRemoveFromShoppingList(promotion.Document)"
-                           StartIcon="@Icons.Material.Outlined.Remove"
-                           FullWidth="true"
-                           Size="Size.Large"
-                           Color="Color.Warning"
-                           Variant="Variant.Text"
-                           Style="box-shadow: 0px 0px 10px rgba(245, 148, 39, 0.8);">
-                                    <strong>@($"{promotion.Document.Price} BGN")</strong>
-                                </MudButton>
-                            }
-                            else
-                            {
-                                <MudButton OnClick="() => AddToCart(promotion.Document)"
-                           StartIcon="@Icons.Material.Outlined.Add"
-                           FullWidth="true"
-                           Size="Size.Large"
-                           Color="Color.Transparent"
-                           Variant="Variant.Text"
-                           Style="box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);"
-                           Class="@applicationState.TossToCartClass">
-                                    <strong>@($"{promotion.Document.Price} BGN")</strong>
-                                    <span class="cart-item"></span>
-                                </MudButton>
-                            }
-                        </MudCardContent>
-                    </MudCard>
-                </MudItem>
-            }
-        </MudGrid>
-    }
-}
 </MudContainer>
 
 
@@ -163,7 +229,7 @@
                 MaxNumberOfDocs = 24,
                 IncludeKaufland = true,
                 IncludeLidl = true,
-                IncludeBilla = true
+                IncludeBilla = false
             };
 
     public LuceneSearchResponseOfPromotion SearchPromotionsResponse { get; set; }

@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Vetrina.Server.Migrations
 {
-    public partial class Initial_Migration_Create_Vetrina_DB : Migration
+    public partial class Initial : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -19,7 +19,7 @@ namespace Vetrina.Server.Migrations
                     PromotionEndingAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Price = table.Column<double>(type: "float", nullable: false),
                     PriceRaw = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    OfficialPrice = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    OfficialPrice = table.Column<double>(type: "float", nullable: false),
                     DiscountPercentage = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     DescriptionRaw = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     DescriptionSearch = table.Column<string>(type: "nvarchar(max)", nullable: true),

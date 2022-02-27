@@ -32,7 +32,7 @@ namespace Vetrina.Server.Services
         {
             var options = new ChromeOptions();
 
-            options.AddArgument("--headless");
+            //options.AddArgument("--headless");
             options.AddArgument("--disable-dev-shm-usage");
             options.AddArgument("--no-sandbox");
             options.AddArgument("--disable-extensions");

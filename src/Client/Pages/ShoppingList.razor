@@ -11,6 +11,9 @@
 @inject IShoppingListService shoppingListService;
 
 <MudContainer Class="mt-6">
+    <MudText Align="Align.Center" Typo="Typo.h4" GutterBottom="true">
+        Koшница
+    </MudText>
     <MudGrid>
         <MudItem xs="12" sm="12" md="12" lg="12" xl="12" xxl="12">
             <MudTable Class="mt-4" Virtualize="true" SelectedItems="SelectedItems" Dense="true" RowsPerPage="25" Items="this.shoppingList" MultiSelection="true" Hover="true" SortLabel="Сортирай по" AllowUnsorted="false" Elevation="0">
@@ -31,22 +34,22 @@
                     <MudTd DataLabel="Продукт">@context.Promotion.DescriptionRaw</MudTd>
                     <MudTd DataLabel="Цена">@context.Promotion.Price</MudTd>
                     <MudTd DataLabel="Количество">
-                        <MudIconButton Icon="@Icons.Material.Filled.Add" Size="Size.Small" OnClick="() => this.shoppingListService.IncreaseQuantityInShoppingList(context.Promotion)" />
+                        <MudIconButton Icon="@Icons.Material.Filled.Add" Size="Size.Small" OnClick="() => this.shoppingListService.IncreaseQuantityInShoppingList(context.Promotion)"/>
                         @context.Quantity
-                        <MudIconButton Icon="@Icons.Material.Filled.Remove" Size="Size.Small" OnClick="() => this.shoppingListService.DecreaseQuantityInShoppingList(context.Promotion)" />
+                        <MudIconButton Icon="@Icons.Material.Filled.Remove" Size="Size.Small" OnClick="() => this.shoppingListService.DecreaseQuantityInShoppingList(context.Promotion)"/>
                     </MudTd>
                     <MudTd DataLabel="Обща сума">@(Math.Round(context.Quantity * context.Promotion.Price, 2, MidpointRounding.ToEven))</MudTd>
                     <MudTd DataLabel="Магазин">@context.Promotion.Store.ToString()</MudTd>
                     <MudTd DataLabel="Премахни">
-                        <MudIconButton Icon="@Icons.Material.Filled.RemoveCircleOutline" Color="Color.Error" aria-label="Премахни" OnClick="() => TryRemoveFromShoppingList(context.Promotion)" />
+                        <MudIconButton Icon="@Icons.Material.Filled.RemoveCircleOutline" Color="Color.Error" aria-label="Премахни" OnClick="() => TryRemoveFromShoppingList(context.Promotion)"/>
                     </MudTd>
                 </RowTemplate>
                 <PagerContent>
-                    <MudTablePager HorizontalAlignment="HorizontalAlignment.Center" RowsPerPageString="Брой продукти на страница" InfoFormat="{first_item} - {last_item} от общо {all_items}" PageSizeOptions="new int[] { 10, 25, 50, 100 }" />
+                    <MudTablePager HorizontalAlignment="HorizontalAlignment.Center" RowsPerPageString="Брой продукти на страница" InfoFormat="{first_item} - {last_item} от общо {all_items}" PageSizeOptions="new int[] { 10, 25, 50, 100 }"/>
                 </PagerContent>
             </MudTable>
         </MudItem>
-        
+
         @if (this.shoppingList.Any())
         {
             @*<MudItem xs="12" sm="12" md="12" lg="12" xl="12" xxl="12"></MudItem>*@

@@ -144,9 +144,11 @@ namespace Vetrina.Server.Mediatr.CommandHandlers
 
                             var discount =
                                 promotionalElement.FindElementExists(
-                                        By.CssSelector("div.a-pricetag__discount"))?.Text
-                                    .Replace("-", string.Empty)
-                                    .Replace("%", string.Empty);
+                                    By.CssSelector("div.a-pricetag__discount"))?.Text ?? string.Empty;
+
+                            double.TryParse(
+                                string.Join(string.Empty, discount.Where(char.IsDigit)),
+                                out var discountPercentage);
 
                             var officialPrice =
                                 promotionalElement.FindElementExists(
@@ -165,13 +167,18 @@ namespace Vetrina.Server.Mediatr.CommandHandlers
                                     promotionalPrice.Trim().Replace(',', '.'),
                                     out var price);
 
+                            var isOfficialPriceParseable =
+                                double.TryParse(
+                                    officialPrice.Trim().Replace(',', '.'),
+                                    out var officialPriceValue);
+
                             var promotionalItem = new Promotion
                             {
                                 DescriptionRaw = description,
-                                DiscountPercentage = discount,
+                                DiscountPercentage = discountPercentage.ToString(CultureInfo.InvariantCulture),
                                 PriceRaw = promotionalPrice,
                                 Price = isPriceParseable ? Math.Round(price, 2, MidpointRounding.ToZero) : 0,
-                                OfficialPrice = officialPrice,
+                                OfficialPrice = isOfficialPriceParseable ? Math.Round(officialPriceValue, 2, MidpointRounding.ToZero) : 0,
                                 ImageUrl = imageUrl,
                                 PromotionStartingFrom = promotionPeriod.From,
                                 PromotionEndingAt = promotionPeriod.To,

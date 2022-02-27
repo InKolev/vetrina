@@ -128,6 +128,14 @@ namespace Vetrina.Server.Mediatr.CommandHandlers
 
                         foreach (var promotionalElement in promotionalElements)
                         {
+                            var discount =
+                                promotionalElement.FindElementExists(
+                                    By.CssSelector("div.pricebox__highlight"))?.Text ?? string.Empty;
+
+                            double.TryParse(
+                                string.Join(string.Empty, discount.Where(char.IsDigit)),
+                                 out var discountPercentage);
+
                             var description =
                                 promotionalElement.FindElementExists(
                                     By.CssSelector("div.product__text"))?.Text.Trim();
@@ -136,10 +144,7 @@ namespace Vetrina.Server.Mediatr.CommandHandlers
                                 promotionalElement.FindElementExists(
                                     By.CssSelector("div.pricebox__basic-quantity"))?.Text.Trim();
 
-                            var officialPrice =
-                                promotionalElement.FindElementExists(
-                                        By.CssSelector("span.pricebox__recommended-retail-price"))?.Text
-                                    .RemoveWhitespace();
+                            var isOfficialPriceParseable = ExtractOfficialPrice(promotionalElement, out var officialPriceValue);
 
                             var promotionalPrice =
                                 promotionalElement.FindElementExists(
@@ -159,11 +164,12 @@ namespace Vetrina.Server.Mediatr.CommandHandlers
                                 DescriptionRaw = $"{description} ({additionalInformation})",
                                 PriceRaw = promotionalPrice,
                                 Price = isPriceParseable ? Math.Round(price, 2, MidpointRounding.ToZero) : 0,
-                                OfficialPrice = officialPrice,
+                                OfficialPrice = isOfficialPriceParseable ? Math.Round(officialPriceValue, 2, MidpointRounding.ToZero) : 0,
                                 ImageUrl = imageUrl,
                                 PromotionStartingFrom = promotionPeriod.From,
                                 PromotionEndingAt = promotionPeriod.To,
-                                Store = Store.Lidl,
+                                DiscountPercentage = discountPercentage.ToString(CultureInfo.InvariantCulture),
+                                Store = Store.Lidl
                             };
 
                             promotionalItem.DescriptionSearch = await transliterationService.LatinToCyrillicAsync(promotionalItem.DescriptionRaw.ToLowerInvariant(), LanguageHint.Bulgarian);
@@ -174,8 +180,9 @@ namespace Vetrina.Server.Mediatr.CommandHandlers
                                 $"{JsonConvert.SerializeObject(promotionalItem, Formatting.Indented)}");
                         }
                     }
-                    catch (Exception)
+                    catch (Exception exc)
                     {
+                        logger.LogError(exc, "Failure while processing product.");
                         // TODO: Add to list of failures.
                         // Different categories/pages might fail to be scraped for different reasons.
                     }
@@ -209,6 +216,34 @@ namespace Vetrina.Server.Mediatr.CommandHandlers
             {
                 webDriver.Dispose();
             }
+        }
+
+        private static bool ExtractOfficialPrice(IWebElement promotionalElement, out double officialPriceValue)
+        {
+            var officialPriceElement =
+                promotionalElement.FindElementExists(
+                    By.CssSelector("div.pricebox__discount-wrapper"));
+
+            if (officialPriceElement == null)
+            {
+                officialPriceValue = 0;
+                return false;
+            }
+
+            var originalText = officialPriceElement.Text;
+
+            var officialPriceElementText = originalText
+                    .Split("\r\n", StringSplitOptions.RemoveEmptyEntries)
+                    .FirstOrDefault()?
+                    .RemoveWhitespace()
+                    .Replace(',', '.') ?? string.Empty;
+
+            var isOfficialPriceParseable =
+                double.TryParse(
+                    officialPriceElementText,
+                    out officialPriceValue);
+
+            return isOfficialPriceParseable;
         }
     }
 }

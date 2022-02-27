@@ -781,8 +781,8 @@ namespace Vetrina.Autogen.API.Client.Contracts
         [Newtonsoft.Json.JsonProperty("priceRaw", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string PriceRaw { get; set; }
 
-        [Newtonsoft.Json.JsonProperty("officialPrice", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public string OfficialPrice { get; set; }
+        [Newtonsoft.Json.JsonProperty("officialPrice", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public double OfficialPrice { get; set; }
 
         [Newtonsoft.Json.JsonProperty("discountPercentage", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string DiscountPercentage { get; set; }

@@ -14,7 +14,7 @@ namespace Vetrina.Shared
 
         public string PriceRaw { get; set; }
 
-        public string OfficialPrice { get; set; }
+        public double OfficialPrice { get; set; }
 
         public string DiscountPercentage { get; set; }
 

@@ -23,7 +23,7 @@ namespace Vetrina.Server.Extensions
 
                 OfficialPrice = luceneDocument
                     .GetField(nameof(Promotion.OfficialPrice))
-                    .GetStringValue(),
+                    .GetDoubleValueOrDefault(),
 
                 Store = (Store)luceneDocument
                     .GetField(nameof(Promotion.Store))
@@ -85,9 +85,9 @@ namespace Vetrina.Server.Extensions
                     promotion.DescriptionSearch,
                     Field.Store.YES),
 
-                new StringField(
+                new DoubleField(
                     nameof(Promotion.OfficialPrice),
-                    promotion.OfficialPrice ?? string.Empty,
+                    promotion.OfficialPrice,
                     Field.Store.YES),
 
                 new StringField(

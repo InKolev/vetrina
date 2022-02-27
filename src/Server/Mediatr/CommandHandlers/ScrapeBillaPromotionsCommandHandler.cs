@@ -98,10 +98,10 @@ public class ScrapeBillaPromotionsCommandHandler :
                 {
                     var discount =
                         promotionalElement.FindElementExists(
-                            By.CssSelector("div.discount"))?.Text.RemoveWhitespace();
+                            By.CssSelector("div.discount"))?.Text ?? string.Empty;
 
                     var isActualProduct = double.TryParse(
-                        discount?.RemoveWhitespace().Trim('%').Trim('-'),
+                        string.Join(string.Empty, discount.Where(char.IsDigit)),
                         out var discountPercentage) && discountPercentage != 0;
 
                     if (!isActualProduct)
@@ -115,20 +115,16 @@ public class ScrapeBillaPromotionsCommandHandler :
 
                     var officialPrice =
                         promotionalElement.FindElementExists(
-                            By.CssSelector("div:nth-child(3) > span.price"))?.Text.RemoveWhitespace();
+                            By.CssSelector("div:nth-child(3) > span.price"))?.Text.RemoveWhitespace() ?? string.Empty;
+
+                    var isOfficialPriceParseable =
+                        double.TryParse(
+                            officialPrice.Trim().Replace(',', '.'),
+                            out var officialPriceValue);
 
                     var promotionalPrice =
                         promotionalElement.FindElementExists(
                             By.CssSelector("div:nth-child(6) > span.price"))?.Text.RemoveWhitespace();
-
-                    //var imageUrl =
-                    //    promotionalElement.FindElementExists(
-                    //        By.CssSelector("picture.picture img"))?.GetAttribute("currentSrc");
-
-                    //var additionalInformation =
-                    //    promotionalElement.FindElementExists(
-                    //        By.CssSelector("div.pricebox__basic-quantity"))?.Text.Trim();
-
 
                     var isPriceParseable =
                         double.TryParse(
@@ -140,9 +136,8 @@ public class ScrapeBillaPromotionsCommandHandler :
                         DescriptionRaw = $"{description}",
                         PriceRaw = promotionalPrice,
                         Price = isPriceParseable ? Math.Round(price, 2, MidpointRounding.ToZero) : 0,
-                        OfficialPrice = officialPrice,
-                        //ImageUrl = imageUrl,
-                        DiscountPercentage = discount,
+                        OfficialPrice = isOfficialPriceParseable ? Math.Round(officialPriceValue, 2, MidpointRounding.ToZero) : 0,
+                        DiscountPercentage = discountPercentage.ToString(CultureInfo.InvariantCulture),
                         PromotionStartingFrom = promotionPeriod.From,
                         PromotionEndingAt = promotionPeriod.To,
                         Store = Store.Billa
