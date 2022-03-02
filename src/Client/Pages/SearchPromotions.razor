@@ -107,32 +107,20 @@
                                     <MudCardMedia Image="@promotion.Document.ImageUrl" Class="promotion-card-small" Height="200" />
                                     <MudCardContent>
                                         <MudGrid>
-                                            <MudItem xs="12" sm="12" md="12" lg="12" xl="12" xxl="12" Style="font-weight: bold; margin-bottom:0px; padding-bottom: 0px;">
-                                                @if (promotion.Document.OfficialPrice != 0)
-                                                {
-                                                    <MudText Style="font-size: smaller;" Align="Align.End" Color="Color.Error">
+                                            <MudItem xs="12" sm="12" md="12" lg="12" xl="12" xxl="12">
+                                                <div class="mud-theme-warning py-1 px-1 rounded-t" style="display: flex; justify-content: center;">
+                                                    <MudText Class="mr-3" Style="font-size:smaller;" Align="Align.Center" Color="Color.Default" Inline="true">
                                                         <del>@($"{promotion.Document.OfficialPrice} лв")</del>
                                                     </MudText>
-                                                }
-                                                else
-                                                {
-                                                    <MudText Style="font-size: smaller;" Align="Align.End" Color="Color.Error">
-                                                        <del>@($"{promotion.Document.Price} лв")</del>
-                                                    </MudText>
-                                                }
-                                            </MudItem>
-                                            <MudItem xs="6" sm="6" md="6" lg="6" xl="6" xxl="6">
-                                                @if (!string.IsNullOrWhiteSpace(promotion.Document.DiscountPercentage))
-                                                {
-                                                    <MudText Style="font-size: larger; font-weight: bolder;" Align="Align.Left" Color="Color.Tertiary">
+                                                    <MudText Style="font-size:smaller;" Color="Color.Default" Align="Align.Left" Inline="true">
                                                         @($"-{promotion.Document.DiscountPercentage}%")
                                                     </MudText>
-                                                }
-                                            </MudItem>
-                                            <MudItem xs="6" sm="6" md="6" lg="6" xl="6" xxl="6">
-                                                <MudText Style="font-size: larger; font-weight: bolder" Color="Color.Error" Align="Align.Right">
-                                                    @($"{promotion.Document.Price.ToString("C").Replace("$", string.Empty)} лв")
-                                                </MudText>
+                                                </div>
+                                                <div class="mud-theme-error py-2 px-1 rounded-b">
+                                                    <MudText Style="font-size: larger;" Color="Color.Default" Align="Align.Center">
+                                                        @($"{promotion.Document.Price.ToString("C").Replace("$", string.Empty)} лв")
+                                                    </MudText>
+                                                </div>
                                             </MudItem>
                                         </MudGrid>
                                     </MudCardContent>
@@ -162,32 +150,20 @@
                                     <MudCardMedia Image="@promotion.Document.ImageUrl" Class="promotion-card-small" Height="200" />
                                     <MudCardContent>
                                         <MudGrid>
-                                            <MudItem xs="12" sm="12" md="12" lg="12" xl="12" xxl="12" Style="font-weight: bold; margin-bottom:0px; padding-bottom: 0px;">
-                                                @if (promotion.Document.OfficialPrice != 0)
-                                                {
-                                                    <MudText Style="font-size: smaller;" Align="Align.End" Color="Color.Error">
+                                            <MudItem xs="12" sm="12" md="12" lg="12" xl="12" xxl="12">
+                                                <div class="mud-theme-warning py-1 px-1 rounded-t" style="display: flex; justify-content: center;">
+                                                    <MudText Class="mr-3" Style="font-size:smaller;" Align="Align.Center" Color="Color.Default" Inline="true">
                                                         <del>@($"{promotion.Document.OfficialPrice} лв")</del>
                                                     </MudText>
-                                                }
-                                                else
-                                                {
-                                                    <MudText Style="font-size: smaller;" Align="Align.End" Color="Color.Error">
-                                                        <del>@($"{promotion.Document.Price} лв")</del>
-                                                    </MudText>
-                                                }
-                                            </MudItem>
-                                            <MudItem xs="6" sm="6" md="6" lg="6" xl="6" xxl="6">
-                                                @if (!string.IsNullOrWhiteSpace(promotion.Document.DiscountPercentage))
-                                                {
-                                                    <MudText Style="font-size: larger; font-weight: bolder;" Align="Align.Left" Color="Color.Tertiary">
+                                                    <MudText Style="font-size:smaller;" Color="Color.Default" Align="Align.Left" Inline="true">
                                                         @($"-{promotion.Document.DiscountPercentage}%")
                                                     </MudText>
-                                                }
-                                            </MudItem>
-                                            <MudItem xs="6" sm="6" md="6" lg="6" xl="6" xxl="6">
-                                                <MudText Style="font-size: larger; font-weight: bolder" Color="Color.Error" Align="Align.Right">
-                                                    @($"{promotion.Document.Price.ToString("C").Replace("$", string.Empty)} лв")
-                                                </MudText>
+                                                </div>
+                                                <div class="mud-theme-error py-2 px-1 rounded-b">
+                                                    <MudText Style="font-size: larger;" Color="Color.Default" Align="Align.Center">
+                                                        @($"{promotion.Document.Price.ToString("C").Replace("$", string.Empty)} лв")
+                                                    </MudText>
+                                                </div>
                                             </MudItem>
                                         </MudGrid>
                                     </MudCardContent>
@@ -205,6 +181,8 @@
 @code
 {
     private List<ShoppingListItem> shoppingList = new List<ShoppingListItem>();
+
+    private MudTheme Theme = new MudTheme();
 
     public Random PseudoRandomGenerator = new Random();
 
@@ -243,6 +221,7 @@
     public double ServerProcessingTimeSecs { get; set; }
 
     Color color = Color.Success;
+
     private void OnScroll(ScrollEventArgs e)
     {
         color = (e.FirstChildBoundingClientRect.Top * -1) switch
@@ -314,13 +293,15 @@
 
     private async Task TryRemoveFromShoppingList(Promotion promotion)
     {
-        var dialogReference = this.dialogService.Show<ConfirmActionDialog>("Искате ли да премахнете продукта от кошницата?");
-        var dialogResult = await dialogReference.Result;
+        await this.shoppingListService.RemoveFromShoppingList(promotion);
 
-        if (!dialogResult.Cancelled)
-        {
-            await this.shoppingListService.RemoveFromShoppingList(promotion);
-        }
+        //var dialogReference = this.dialogService.Show<ConfirmActionDialog>("Искате ли да премахнете продукта от кошницата?");
+        //var dialogResult = await dialogReference.Result;
+
+        //if (!dialogResult.Cancelled)
+        //{
+        //    await this.shoppingListService.RemoveFromShoppingList(promotion);
+        //}
     }
 
     private async Task AddToCart(Promotion promotion)
