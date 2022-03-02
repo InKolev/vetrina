@@ -107,18 +107,18 @@
                                     <MudCardMedia Image="@promotion.Document.ImageUrl" Class="promotion-card-small" Height="200" />
                                     <MudCardContent>
                                         <MudGrid>
-                                            <MudItem xs="12" sm="12" md="12" lg="12" xl="12" xxl="12">
-                                                <div class="mud-theme-warning py-1 px-1 rounded-t" style="display: flex; justify-content: center;">
-                                                    <MudText Class="mr-3" Style="font-size:smaller;" Align="Align.Center" Color="Color.Default" Inline="true">
+                                           <MudItem xs="12" sm="12" md="12" lg="12" xl="12" xxl="12">
+                                                <div class="mud-theme-default py-1 px-1 rounded-t" style="display: flex; justify-content: center;">
+                                                    <MudText Class="mr-3" Style="font-size:smaller;font-weight:bold;" Align="Align.Center" Color="Color.Default" Inline="true">
                                                         <del>@($"{promotion.Document.OfficialPrice} лв")</del>
                                                     </MudText>
-                                                    <MudText Style="font-size:smaller;" Color="Color.Default" Align="Align.Left" Inline="true">
+                                                    <MudText Style="font-size:smaller;font-weight:bold;" Color="Color.Default" Align="Align.Left" Inline="true">
                                                         @($"-{promotion.Document.DiscountPercentage}%")
                                                     </MudText>
                                                 </div>
                                                 <div class="mud-theme-error py-2 px-1 rounded-b">
                                                     <MudText Style="font-size: larger;" Color="Color.Default" Align="Align.Center">
-                                                        @($"{promotion.Document.Price.ToString("C").Replace("$", string.Empty)} лв")
+                                                        @($"{promotion.Document.Price.ToString("C").Replace("$", string.Empty)}*")<small> лв</small>
                                                     </MudText>
                                                 </div>
                                             </MudItem>
@@ -150,18 +150,18 @@
                                     <MudCardMedia Image="@promotion.Document.ImageUrl" Class="promotion-card-small" Height="200" />
                                     <MudCardContent>
                                         <MudGrid>
-                                            <MudItem xs="12" sm="12" md="12" lg="12" xl="12" xxl="12">
-                                                <div class="mud-theme-warning py-1 px-1 rounded-t" style="display: flex; justify-content: center;">
-                                                    <MudText Class="mr-3" Style="font-size:smaller;" Align="Align.Center" Color="Color.Default" Inline="true">
+                                             <MudItem xs="12" sm="12" md="12" lg="12" xl="12" xxl="12">
+                                                <div class="mud-theme-default py-1 px-1 rounded-t" style="display: flex; justify-content: center;">
+                                                    <MudText Class="mr-3" Style="font-size:smaller;font-weight:bold;" Align="Align.Center" Color="Color.Default" Inline="true">
                                                         <del>@($"{promotion.Document.OfficialPrice} лв")</del>
                                                     </MudText>
-                                                    <MudText Style="font-size:smaller;" Color="Color.Default" Align="Align.Left" Inline="true">
+                                                    <MudText Style="font-size:smaller;font-weight:bold;" Color="Color.Default" Align="Align.Left" Inline="true">
                                                         @($"-{promotion.Document.DiscountPercentage}%")
                                                     </MudText>
                                                 </div>
                                                 <div class="mud-theme-error py-2 px-1 rounded-b">
                                                     <MudText Style="font-size: larger;" Color="Color.Default" Align="Align.Center">
-                                                        @($"{promotion.Document.Price.ToString("C").Replace("$", string.Empty)} лв")
+                                                        @($"{promotion.Document.Price.ToString("C").Replace("$", string.Empty)}*")<small> лв</small>
                                                     </MudText>
                                                 </div>
                                             </MudItem>
