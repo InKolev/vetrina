@@ -1,0 +1,79 @@
+﻿@using Vetrina.Autogen.API.Client.Contracts
+@using Vetrina.Client.Services
+
+@inject ApplicationState applicationState;
+@inject IShoppingListService shoppingListService;
+
+<MudCard Class="ml-3 box" Elevation="3">
+
+    <div onclick="@(() => AddToCart(PromotionProduct.Document))" style="cursor: pointer;" class="@applicationState.TossToCartClass">
+        <div class="@(isPromotionAvailableToday ? "ribbon-green" : "ribbon")"><span>@PromotionProduct.Document.PromotionStartingFrom.ToString("dd/MM") — @PromotionProduct.Document.PromotionEndingAt.ToString("dd/MM")</span></div>
+        <MudCardHeader>
+            <CardHeaderAvatar>
+                <MudAvatar Elevation="2" Size="Size.Large"
+                           Square="@(PromotionProduct.Document.Store == Store.Lidl ? false : true)"
+                           Image="@($"/resources/{PromotionProduct.Document.Store.ToString()}.svg")">
+                </MudAvatar>
+            </CardHeaderAvatar>
+            <CardHeaderContent>
+                <MudText Typo="Typo.body1" Align="Align.Left">
+                    <p title="@PromotionProduct.Document.DescriptionRaw" class="cut-text">@PromotionProduct.Document.DescriptionRaw</p>
+                </MudText>
+            </CardHeaderContent>
+        </MudCardHeader>
+        <MudCardMedia Image="@PromotionProduct.Document.ImageUrl" Class="promotion-card-small" Height="200"/>
+        <MudCardContent>
+            <MudGrid>
+                <MudItem xs="12" sm="12" md="12" lg="12" xl="12" xxl="12">
+                    <div class="mud-theme-default py-1 px-1 rounded-t">
+                        <MudText Style="font-size: small; font-weight: bold;" Align="Align.Right" Color="Color.Default">
+                            <del>@($"{PromotionProduct.Document.OfficialPrice} лв")</del> &nbsp;&nbsp;
+                            @($"-{PromotionProduct.Document.DiscountPercentage}%")
+                        </MudText>
+                    </div>
+                    <div class="mud-theme-error py-1 px-1 rounded-b">
+                        <MudText Style="font-size: larger;" Color="Color.Default" Align="Align.Center">
+                            @($"{PromotionProduct.Document.Price.ToString("C").Replace("$", string.Empty)}".Trim())<small><sup>*</sup> лв</small>
+                        </MudText>
+                    </div>
+                </MudItem>
+            </MudGrid>
+        </MudCardContent>
+    </div>
+</MudCard>
+
+
+@code {
+    [Parameter]
+    [EditorRequired]
+    public SearchDocumentHitOfPromotion PromotionProduct { get; set; }
+
+    private bool isPromotionAvailableToday;
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+
+        isPromotionAvailableToday =
+            DateTime.UtcNow.Date >= this.PromotionProduct.Document.PromotionStartingFrom.Date
+            && DateTime.UtcNow.Date <= this.PromotionProduct.Document.PromotionEndingAt.Date;
+    }
+
+    private async Task AddToCart(Promotion promotion)
+    {
+        await this.shoppingListService.AddPromotionalItemToShoppingList(promotion);
+    }
+
+    private async Task TryRemoveFromShoppingList(Promotion promotion)
+    {
+        await this.shoppingListService.RemoveFromShoppingList(promotion);
+
+        //var dialogReference = this.dialogService.Show<ConfirmActionDialog>("Искате ли да премахнете продукта от кошницата?");
+        //var dialogResult = await dialogReference.Result;
+
+        //if (!dialogResult.Cancelled)
+        //{
+        //    await this.shoppingListService.RemoveFromShoppingList(promotion);
+        //}
+    }
+}
