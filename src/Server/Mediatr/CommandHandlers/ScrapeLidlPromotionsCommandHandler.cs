@@ -98,8 +98,8 @@ namespace Vetrina.Server.Mediatr.CommandHandlers
                             new WebDriverWait(webDriver, TimeSpan.FromSeconds(10))
                                 .Until(ExpectedConditions
                                     .ElementExists(
-                                        By.CssSelector("div.ribbon__text")));
-
+                                        By.CssSelector(".lidl-m-ribbon-item__text")));
+                                                           
                         var matches =
                             new Regex(@"(\d\d\.\d\d)", RegexOptions.CultureInvariant)
                                 .Matches(promotionPeriodElement.Text);
@@ -124,13 +124,13 @@ namespace Vetrina.Server.Mediatr.CommandHandlers
 
                         var promotionalElements =
                             webDriver.FindElements(
-                                By.CssSelector("article.product"));
+                                By.CssSelector("article.ret-o-card"));
 
                         foreach (var promotionalElement in promotionalElements)
                         {
                             var discount =
                                 promotionalElement.FindElementExists(
-                                    By.CssSelector("div.pricebox__highlight"))?.Text ?? string.Empty;
+                                    By.CssSelector(".lidl-m-pricebox__highlight"))?.Text ?? string.Empty;
 
                             double.TryParse(
                                 string.Join(string.Empty, discount.Where(char.IsDigit)),
@@ -138,21 +138,21 @@ namespace Vetrina.Server.Mediatr.CommandHandlers
 
                             var description =
                                 promotionalElement.FindElementExists(
-                                    By.CssSelector("div.product__text"))?.Text.Trim();
+                                    By.CssSelector(".ret-o-card__headline"))?.Text.Trim();
 
                             var additionalInformation =
                                 promotionalElement.FindElementExists(
-                                    By.CssSelector("div.pricebox__basic-quantity"))?.Text.Trim();
+                                    By.CssSelector(".lidl-m-pricebox__basic-quantity"))?.Text.Trim();
 
                             var isOfficialPriceParseable = ExtractOfficialPrice(promotionalElement, out var officialPriceValue);
 
                             var promotionalPrice =
                                 promotionalElement.FindElementExists(
-                                    By.CssSelector("span.pricebox__price"))?.Text.RemoveWhitespace();
+                                    By.CssSelector(".lidl-m-pricebox__price"))?.Text.RemoveWhitespace();
 
                             var imageUrl =
                                 promotionalElement.FindElementExists(
-                                    By.CssSelector("picture.picture img"))?.GetAttribute("currentSrc");
+                                    By.CssSelector("picture.ret-o-card__picture img"))?.GetAttribute("currentSrc");
 
                             var isPriceParseable =
                                 double.TryParse(
@@ -222,7 +222,7 @@ namespace Vetrina.Server.Mediatr.CommandHandlers
         {
             var officialPriceElement =
                 promotionalElement.FindElementExists(
-                    By.CssSelector("div.pricebox__discount-wrapper"));
+                    By.CssSelector(".lidl-m-pricebox__discount-price"));
 
             if (officialPriceElement == null)
             {
